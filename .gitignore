@@ -407,3 +407,5 @@ Makefile
 *.swn
 
 compile_commands.json
+
+raygui.h
