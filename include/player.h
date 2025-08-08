@@ -7,12 +7,17 @@ class Player : public GameObject {
 public:
   float forceMult;
   float epsilon;
+  float maxVelocity;
+  float dashMagnitude;
   Vector2 velocity;
+  Vector2 dashVelocity;
+  Vector2 movementVelocity;
 
   Player();
 
   void Update() override;
-  Vector2 HandleUserInput();
+  void HandleUserInput();
   void Draw() override;
   void DrawGizmos() override;
+  void HandleDash();
 };

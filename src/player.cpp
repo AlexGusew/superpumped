@@ -1,6 +1,8 @@
 #include "player.h"
 #include "config.h"
 #include "constants.h"
+#include "raygui.h"
+#include "raylib.h"
 #include <algorithm>
 #include <cmath>
 
@@ -9,70 +11,121 @@ Player::Player() {
   int w = GetScreenWidth();
   size = {GRID_SIZE, GRID_SIZE};
   translation = {w / 2.0f - size.x / 2, h / 2.0f - size.y / 2};
-  forceMult = 500.0f;
+  forceMult = 50.0f;
+  dashMagnitude = 10;
+  maxVelocity = 10;
   velocity = {0.0f, 0.0f};
+  dashVelocity = {0.0f, 0.0f};
+  movementVelocity = {0.0f, 0.0f};
   epsilon = 0.01f;
 }
 
 void Player::Update() {
-  Vector2 movement = HandleUserInput();
-  translation = movement;
-}
-
-Vector2 Player::HandleUserInput() {
+  float deltaTime = GetFrameTime();
   int h = GetScreenHeight();
   int w = GetScreenWidth();
-  float deltaTime = GetFrameTime();
 
-  if (IsKeyDown(KEY_W))
-    velocity.y -= 1;
-  if (IsKeyDown(KEY_S))
-    velocity.y += 1;
-  if (IsKeyDown(KEY_A))
-    velocity.x -= 1;
-  if (IsKeyDown(KEY_D))
-    velocity.x += 1;
+  HandleUserInput();
+  HandleDash();
 
-  velocity.x = std::clamp(velocity.x, -1.0f, 1.0f);
-  velocity.y = std::clamp(velocity.y, -1.0f, 1.0f);
+  velocity.x = movementVelocity.x + dashVelocity.x;
+  velocity.y = movementVelocity.y + dashVelocity.y;
 
-  // normalize force if it exceeds 1
-  float mag = std::sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
-  if (mag > 1) {
-    velocity.x = velocity.x / mag;
-    velocity.y = velocity.y / mag;
+  float dx = velocity.x * forceMult * deltaTime;
+  float dy = velocity.y * forceMult * deltaTime;
+
+  translation.x =
+      std::clamp(translation.x + dx, 0.0f, static_cast<float>(w - size.x));
+  translation.y =
+      std::clamp(translation.y + dy, 0.0f, static_cast<float>(h - size.y));
+}
+
+void Player::HandleDash() {
+  if (IsKeyPressed(KEY_SPACE)) {
+    Vector2 unit = {0};
+    if (IsKeyDown(KEY_W))
+      unit.y -= 1;
+    if (IsKeyDown(KEY_S))
+      unit.y += 1;
+    if (IsKeyDown(KEY_A))
+      unit.x -= 1;
+    if (IsKeyDown(KEY_D))
+      unit.x += 1;
+    if (!unit.x && !unit.y) {
+      unit.x = 1;
+    }
+    float mag = std::sqrt(unit.x * unit.x + unit.y * unit.y);
+    unit.x /= mag;
+    unit.y /= mag;
+
+    unit.x *= dashMagnitude;
+    unit.y *= dashMagnitude;
+
+    dashVelocity.x += unit.x;
+    dashVelocity.y += unit.y;
   }
 
-  velocity.x *= 0.9f;
-  velocity.y *= 0.9f;
+  dashVelocity.x *= 0.9f;
+  dashVelocity.y *= 0.9f;
+}
 
-  if (std::abs(velocity.x) < epsilon)
-    velocity.x = 0;
-  if (std::abs(velocity.y) < epsilon)
-    velocity.y = 0;
+void Player::HandleUserInput() {
+  if (IsKeyDown(KEY_W))
+    movementVelocity.y -= 1;
+  if (IsKeyDown(KEY_S))
+    movementVelocity.y += 1;
+  if (IsKeyDown(KEY_A))
+    movementVelocity.x -= 1;
+  if (IsKeyDown(KEY_D))
+    movementVelocity.x += 1;
 
-  return {std::clamp(translation.x + velocity.x * forceMult * deltaTime, 0.0f,
-                     static_cast<float>(w - size.x)),
-          std::clamp(translation.y + velocity.y * forceMult * deltaTime, 0.0f,
-                     static_cast<float>(h - size.y))};
+  movementVelocity.x =
+      std::clamp(movementVelocity.x, -maxVelocity, maxVelocity);
+  movementVelocity.y =
+      std::clamp(movementVelocity.y, -maxVelocity, maxVelocity);
+
+  // normalize force if it exceeds maxVelocity
+  float mag = std::sqrt(movementVelocity.x * movementVelocity.x +
+                        movementVelocity.y * movementVelocity.y);
+  if (mag > maxVelocity) {
+    movementVelocity.x = movementVelocity.x * maxVelocity / mag;
+    movementVelocity.y = movementVelocity.y * maxVelocity / mag;
+  }
+
+  movementVelocity.x *= 0.9f;
+  movementVelocity.y *= 0.9f;
+
+  if (std::abs(movementVelocity.x) < epsilon)
+    movementVelocity.x = 0;
+  if (std::abs(movementVelocity.y) < epsilon)
+    movementVelocity.y = 0;
 }
 
 void Player::Draw() {
   DrawRectangle(static_cast<int>(translation.x),
                 static_cast<int>(translation.y), static_cast<int>(size.x),
                 static_cast<int>(size.y), GREEN);
-  if (Config::Get().gizmosEnabled) {
+  if (Config::Get().gizmosUIEnabled) {
     DrawGizmos();
   }
 }
 
 void Player::DrawGizmos() {
-  float playerVelocityLen = 100;
+  GuiLabel((Rectangle){10, 200, 100, 30},
+           TextFormat("Velocity: %.1f x %.1f", velocity.x, velocity.y));
+  float playerVelocityLen = 10;
   DrawLine(static_cast<int>(translation.x + size.x / 2),
            static_cast<int>(translation.y + size.y / 2),
            static_cast<int>(translation.x + size.x / 2 +
-                            velocity.x * playerVelocityLen),
+                            movementVelocity.x * playerVelocityLen),
            static_cast<int>(translation.y + size.y / 2 +
-                            velocity.y * playerVelocityLen),
+                            movementVelocity.y * playerVelocityLen),
            RED);
+  DrawLine(static_cast<int>(translation.x + size.x / 2),
+           static_cast<int>(translation.y + size.y / 2),
+           static_cast<int>(translation.x + size.x / 2 +
+                            dashVelocity.x * playerVelocityLen),
+           static_cast<int>(translation.y + size.y / 2 +
+                            dashVelocity.y * playerVelocityLen),
+           BLUE);
 }
