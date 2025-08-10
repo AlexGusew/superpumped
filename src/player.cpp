@@ -1,24 +1,25 @@
 #include "player.h"
+#include "collision_solver.h"
 #include "config.h"
 #include "constants.h"
 #include "raygui.h"
 #include "raylib.h"
+#include "shape_drawer.h"
+#include "utils.h"
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
-Player::Player() {
-  int h = GetScreenHeight();
-  int w = GetScreenWidth();
-  size = {GRID_SIZE, GRID_SIZE};
-  translation = {w / 2.0f - size.x / 2, h / 2.0f - size.y / 2};
-  forceMult = 50.0f;
-  dashMagnitude = 10;
-  maxVelocity = 10;
-  velocity = {0.0f, 0.0f};
-  dashVelocity = {0.0f, 0.0f};
-  movementVelocity = {0.0f, 0.0f};
-  epsilon = 0.01f;
-}
+// TODO: Make Player inherited from GameObject
+Player::Player()
+    : GameObject({GetScreenWidth() / 2.0f - GRID_SIZE / 2.0f,
+                  GetScreenHeight() / 2.0f - GRID_SIZE / 2.0f},
+                 {GRID_SIZE / 2.0f, GRID_SIZE / 2.0f},
+                 new Circle({GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f},
+                            GRID_SIZE / 2.0f)),
+      forceMult(50.0f), epsilon(0.01f), dashMagnitude(10), maxVelocity(10),
+      velocity{0.0f, 0.0f}, dashVelocity{0.0f, 0.0f},
+      movementVelocity{0.0f, 0.0f} {}
 
 void Player::Update() {
   float deltaTime = GetFrameTime();
@@ -38,6 +39,28 @@ void Player::Update() {
       std::clamp(translation.x + dx, 0.0f, static_cast<float>(w - size.x));
   translation.y =
       std::clamp(translation.y + dy, 0.0f, static_cast<float>(h - size.y));
+  collider_shape->center = Utils::add(translation, Utils::multiply(size, 0.5f));
+
+  for (auto tile : Config::Get().terrain.tiles) {
+    if (!tile.collider_shape || !tile.use_physics)
+      continue;
+    CollisionResult result =
+        CollisionSolver::checkCollision(collider_shape, tile.collider_shape);
+    if (!result.colliding)
+      continue;
+    translation = Utils::add(translation, result.penetration);
+    CollisionSolver::resolveCollisionSimple(velocity, result.normal);
+  }
+
+  for (auto &target : Config::Get().targets) {
+    if (!target.ready)
+      continue;
+    CollisionResult result =
+        CollisionSolver::checkCollision(collider_shape, target.collider_shape);
+    if (!result.colliding)
+      continue;
+    target.reached = true;
+  }
 }
 
 void Player::HandleDash() {
@@ -102,17 +125,17 @@ void Player::HandleUserInput() {
 }
 
 void Player::Draw() {
-  DrawRectangle(static_cast<int>(translation.x),
-                static_cast<int>(translation.y), static_cast<int>(size.x),
-                static_cast<int>(size.y), GREEN);
+  Vector2 center = Utils::add(translation, Utils::multiply(size, 0.5f));
+  DrawCircle(center.x, center.y, size.x, GREEN);
   if (Config::Get().gizmosUIEnabled) {
     DrawGizmos();
   }
 }
 
 void Player::DrawGizmos() {
-  GuiLabel((Rectangle){10, 200, 100, 30},
+  GuiLabel((Rectangle){10, 30, 100, 50},
            TextFormat("Velocity: %.1f x %.1f", velocity.x, velocity.y));
+  ShapeDrawer::DrawShape(collider_shape);
   float playerVelocityLen = 10;
   DrawLine(static_cast<int>(translation.x + size.x / 2),
            static_cast<int>(translation.y + size.y / 2),

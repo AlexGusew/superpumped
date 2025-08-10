@@ -1,5 +1,7 @@
 #include "terrain.h"
+#include "collision_solver.h"
 #include "constants.h"
+#include "raylib.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -77,19 +79,25 @@ void Terrain::generate_tiles() {
     for (size_t j = 0; j < positions[i].size(); ++j) {
       Vector2 translation = {static_cast<float>(j * GRID_SIZE),
                              static_cast<float>(i * GRID_SIZE)};
-
+      Vector2 size = {GRID_SIZE, GRID_SIZE};
       switch (positions[i][j]) {
-      case 1:
-        tiles.emplace_back("wall", translation);
+      case 1: {
+        OrientedRectangle *collider = new OrientedRectangle(
+            {
+                translation.x + size.x / 2,
+                translation.y + size.y / 2,
+            },
+            size);
+        tiles.push_back(Tile("wall", translation, size, collider, true));
         break;
+      }
       case 2:
-        tiles.emplace_back("grass", translation);
+        tiles.push_back(Tile("grass", translation, size, nullptr));
         break;
       case 3:
-        tiles.emplace_back("water", translation);
+        tiles.push_back(Tile("water", translation, size, nullptr));
         break;
       default:
-        // Skip empty tiles (0) or unknown types
         break;
       }
     }
