@@ -9,6 +9,8 @@
 #include "utils.h"
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include <ostream>
 
 // TODO: Make Player inherited from GameObject
 Player::Player()
@@ -17,9 +19,9 @@ Player::Player()
                  {GRID_SIZE / 2.0f, GRID_SIZE / 2.0f},
                  new Circle({GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f},
                             GRID_SIZE / 2.0f)),
-      forceMult(50.0f), epsilon(0.01f), dashMagnitude(10), maxVelocity(10),
+      forceMult(36.0f), epsilon(0.01f), dashMagnitude(10), maxVelocity(10),
       velocity{0.0f, 0.0f}, dashVelocity{0.0f, 0.0f},
-      movementVelocity{0.0f, 0.0f}, hitInvulDelta(1), hp(3), maxHp(3) {}
+      movementVelocity{0.0f, 0.0f}, hitInvulDelta(0.7), hp(3), maxHp(3) {}
 
 void Player::Update() {
   float deltaTime = GetFrameTime();
@@ -65,6 +67,11 @@ void Player::Update() {
       continue;
     CollisionResult result =
         CollisionSolver::checkCollision(collider_shape, enemy.collider_shape);
+    std::cout << result.colliding << std::endl;
+    std::cout << collider_shape->center.x << " " << collider_shape->center.y
+              << std::endl;
+    std::cout << enemy.collider_shape->center.x << " "
+              << enemy.collider_shape->center.y << std::endl;
     if (!result.colliding)
       continue;
     GetHit();

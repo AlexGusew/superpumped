@@ -8,8 +8,8 @@
 
 class Config {
 public:
-  bool gizmosEnabled = false;
-  bool gizmosUIEnabled = false;
+  bool gizmosEnabled = true;
+  bool gizmosUIEnabled = true;
   float score = 0;
   float scoreMult = 1;
   float perfectScoreMult = 100;

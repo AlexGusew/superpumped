@@ -7,7 +7,6 @@
 #include "terrain.h"
 #include "texture_drawer.h"
 #include "utils.h"
-#include <cmath>
 #include <cstdlib>
 #include <vector>
 
@@ -42,19 +41,20 @@ int main() {
   camera.zoom = 1.0f;
   std::vector<std::vector<double>> times = {
       {3.037974684},
-      {4.556962025},
-      {6.075949367},
-      {7.594936709, 8.35443038, 9.113924051},
-      {10.63291139},
-      {12.15189873, 12.91139241, 13.67088608},
-      {15.18987342, 15.56962025, 15.94936709, 16.32911392},
-      {18.2278481, 18.60759494, 18.98734177, 19.36708861},
-      {21.26582278, 21.64556962, 22.02531646, 22.40506329},
-      {24.30379747, 24.6835443, 25.06329114, 25.44303797},
-      {27.34177215, 27.72151899, 28.10126582, 28.48101266},
-      {30.37974684, 30.75949367, 31.13924051, 31.51898734},
-      {33.41772152, 33.79746835, 34.17721519, 34.55696203},
-      {36.4556962, 36.83544304, 37.21518987, 37.59493671}};
+      // {4.556962025},
+      // {6.075949367},
+      // {7.594936709, 8.35443038, 9.113924051},
+      // {10.63291139},
+      // {12.15189873, 12.91139241, 13.67088608},
+      // {15.18987342, 15.56962025, 15.94936709, 16.32911392},
+      // {18.2278481, 18.60759494, 18.98734177, 19.36708861},
+      // {21.26582278, 21.64556962, 22.02531646, 22.40506329},
+      // {24.30379747, 24.6835443, 25.06329114, 25.44303797},
+      // {27.34177215, 27.72151899, 28.10126582, 28.48101266},
+      // {30.37974684, 30.75949367, 31.13924051, 31.51898734},
+      // {33.41772152, 33.79746835, 34.17721519, 34.55696203},
+      // {36.4556962, 36.83544304, 37.21518987, 37.59493671}
+  };
 
   while (!WindowShouldClose()) {
     if (IsKeyPressed(KEY_R)) {
@@ -69,20 +69,19 @@ int main() {
       PlaySound(track);
 
       for (size_t i = 0; i < std::size(times); i++) {
-        float el_h = GetRandomValue(200, 400);
-        float el_w = GetRandomValue(200, 400);
+        float el_h = GetRandomValue(200, 300);
+        float el_w = GetRandomValue(200, 300);
 
-        float phi = Utils::Deg2Rad(
-            static_cast<float>(GetRandomValue(0, 360))); // rotation
-        float thetaStart = Utils::Deg2Rad(
-            static_cast<float>(GetRandomValue(0, 360))); // start angle
-        float thetaWidth = Utils::Deg2Rad(static_cast<float>(
-            GetRandomValue(30, 160)));            // sector size (0..60°)
-        float thetaEnd = thetaStart + thetaWidth; // end angle
+        float phi = Utils::Deg2Rad(static_cast<float>(GetRandomValue(0, 360)));
+        float thetaStart =
+            Utils::Deg2Rad(static_cast<float>(GetRandomValue(0, 360)));
+        float thetaWidth =
+            Utils::Deg2Rad(static_cast<float>(GetRandomValue(30, 160)));
+        float thetaEnd = thetaStart + thetaWidth;
 
         int steps = times[i].size();
 
-        Vector2 center{static_cast<float>(i * 300),
+        Vector2 center{static_cast<float>(i * 200),
                        static_cast<float>(h) * 0.5f};
         if (i % 4 == 0) {
           Config::Get().enemies.push_back(Enemy(center, 300));

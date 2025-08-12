@@ -5,15 +5,14 @@
 #include "raylib.h"
 #include "shape_drawer.h"
 #include "utils.h"
-#include <iostream>
 
-Enemy::Enemy(Vector2 _controlingPoint, float _controllingRange)
-    : GameObject(_controlingPoint, {GRID_SIZE * 2, GRID_SIZE * 2},
-                 new OrientedRectangle(_controlingPoint,
+Enemy::Enemy(Vector2 _controlingPivot, float _controllingRange)
+    : GameObject(_controlingPivot, {GRID_SIZE * 2, GRID_SIZE * 2},
+                 new OrientedRectangle(_controlingPivot,
                                        {GRID_SIZE * 2, GRID_SIZE * 2})),
       controllingRange(_controllingRange), following(false),
-      triggerCollider(_controlingPoint, _controllingRange),
-      controllingPivot(_controlingPoint) {};
+      triggerCollider(_controlingPivot, {GRID_SIZE, GRID_SIZE}),
+      controllingPivot(_controlingPivot), target(_controlingPivot) {};
 
 void Enemy::Draw() {
   DrawRectangleV(translation, size, {255, 0, 0, 120});
@@ -29,16 +28,23 @@ void Enemy::Update() {
       Utils::magnitude(Utils::subtract(translation, player.translation));
 
   if (std::abs(distToPlayer) < 300) {
-    following = true;
+    target = player.translation;
   }
-  std::cout << distToPivot << " " << distToPlayer << std::endl;
 
-  if (following && std::abs(distToPivot) < 700) {
-    Vector2 target = player.translation;
-    Vector2 dir = Utils::subtract(translation, target);
-    dir = Utils::normalize(dir);
-    dir = Utils::multiply(dir, -70 * GetFrameTime());
-    translation = Utils::add(translation, dir);
-    triggerCollider.center = translation;
+  if (distToPivot > 500) {
+    target = controllingPivot;
   }
+
+  float distToTarget = Utils::magnitude(Utils::subtract(translation, target));
+
+  if (distToTarget <= 10) {
+    return;
+  }
+
+  Vector2 dir = Utils::subtract(translation, target);
+  dir = Utils::normalize(dir);
+  dir = Utils::multiply(dir, -70 * GetFrameTime());
+  translation = Utils::add(translation, dir);
+  triggerCollider.center = translation;
+  collider_shape->center = translation;
 }

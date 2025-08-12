@@ -50,8 +50,8 @@ void Target::Draw() {
       unsigned char opacity =
           static_cast<unsigned char>((factor * (1 - factor) * 255));
       Color current = {255, 255, 255, opacity};
-      DrawText("Perfect", translation.x - size.x / 2,
-               translation.y - size.y / 2, 12, current);
+      DrawText("Perfect", translation.x - size.x / 2 - 20,
+               translation.y - size.y / 2 - 35, 20, current);
     }
     return;
   }

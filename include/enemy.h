@@ -7,7 +7,8 @@
 class Enemy : public GameObject {
 public:
   Vector2 controllingPivot;
-  Circle triggerCollider;
+  Vector2 target;
+  OrientedRectangle triggerCollider;
   float controllingRange;
   bool following;
   bool returning;
