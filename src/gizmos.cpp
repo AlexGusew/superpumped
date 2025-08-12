@@ -17,18 +17,24 @@ void Gizmos::Draw() {
   }
 
   if (Config::Get().gizmosEnabled) {
-    int h = GetScreenHeight();
-    int w = GetScreenWidth();
-    int i = GRID_SIZE;
+    int h = GetScreenHeight() * 10;
+    int w = GetScreenWidth() * 10;
+    int i = -h;
     while (i < h) {
-      DrawLine(0, i, w, i, DGRAY);
+      DrawLine(-w, i, w, i, DGRAY);
       i += GRID_SIZE;
     }
-    i = GRID_SIZE;
+    i = -w;
     while (i < w) {
-      DrawLine(i, 0, i, h, DGRAY);
+      DrawLine(i, -h, i, h, DGRAY);
       i += GRID_SIZE;
     }
+  }
+}
+
+void Gizmos::DrawUI() {
+  if (!Config::Get().gizmosUIEnabled) {
+    return;
   }
 
   if (GuiButton({10, 10, 100, 20}, panelOpen ? "Hide Gizmos" : "Show Gizmos")) {

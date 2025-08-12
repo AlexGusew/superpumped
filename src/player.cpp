@@ -2,13 +2,13 @@
 #include "collision_solver.h"
 #include "config.h"
 #include "constants.h"
+#include "game_object.h"
 #include "raygui.h"
 #include "raylib.h"
 #include "shape_drawer.h"
 #include "utils.h"
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 
 // TODO: Make Player inherited from GameObject
 Player::Player()
@@ -19,7 +19,7 @@ Player::Player()
                             GRID_SIZE / 2.0f)),
       forceMult(50.0f), epsilon(0.01f), dashMagnitude(10), maxVelocity(10),
       velocity{0.0f, 0.0f}, dashVelocity{0.0f, 0.0f},
-      movementVelocity{0.0f, 0.0f} {}
+      movementVelocity{0.0f, 0.0f}, hitInvulDelta(1), hp(3), maxHp(3) {}
 
 void Player::Update() {
   float deltaTime = GetFrameTime();
@@ -35,10 +35,8 @@ void Player::Update() {
   float dx = velocity.x * forceMult * deltaTime;
   float dy = velocity.y * forceMult * deltaTime;
 
-  translation.x =
-      std::clamp(translation.x + dx, 0.0f, static_cast<float>(w - size.x));
-  translation.y =
-      std::clamp(translation.y + dy, 0.0f, static_cast<float>(h - size.y));
+  translation.x = translation.x + dx;
+  translation.y = translation.y + dy;
   collider_shape->center = Utils::add(translation, Utils::multiply(size, 0.5f));
 
   for (auto tile : Config::Get().terrain.tiles) {
@@ -59,8 +57,32 @@ void Player::Update() {
         CollisionSolver::checkCollision(collider_shape, target.collider_shape);
     if (!result.colliding)
       continue;
-    target.reached = true;
+    target.Reach();
   }
+
+  for (auto enemy : Config::Get().enemies) {
+    if (!enemy.collider_shape || lastHitTime + hitInvulDelta > GetTime())
+      continue;
+    CollisionResult result =
+        CollisionSolver::checkCollision(collider_shape, enemy.collider_shape);
+    if (!result.colliding)
+      continue;
+    GetHit();
+  }
+}
+
+void Player::GetHit() {
+  hp -= 1;
+  lastHitTime = GetTime();
+  if (hp < 1) {
+  }
+}
+
+void Player::Reset() {
+  GameObject::Reset();
+  hp = maxHp;
+  movementVelocity = {0, 0};
+  lastHitTime = 0;
 }
 
 void Player::HandleDash() {
@@ -129,6 +151,19 @@ void Player::Draw() {
   DrawCircle(center.x, center.y, size.x, GREEN);
   if (Config::Get().gizmosUIEnabled) {
     DrawGizmos();
+  }
+}
+
+void Player::DrawUI() {
+  Color hpColor = RED;
+  Color missingColor = GRAY;
+  Vector2 offset = {20, 20};
+  Vector2 hpSize = {40, 40};
+
+  for (int i = 0; i < maxHp; i++) {
+    Color current = i <= hp ? hpColor : missingColor;
+    Vector2 position = Utils::add(offset, {(hpSize.x + 20) * i, 0});
+    DrawRectangleV(position, hpSize, current);
   }
 }
 

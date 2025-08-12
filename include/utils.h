@@ -1,6 +1,7 @@
 #pragma once
 
 #include "raylib.h"
+#include <vector>
 
 class Utils {
 public:
@@ -10,4 +11,8 @@ public:
   static Vector2 subtract(const Vector2 &a, const Vector2 &b);
   static Vector2 multiply(const Vector2 &v, float scalar);
   static float magnitude(const Vector2 &v);
+  static float Deg2Rad(float deg);
+  static std::vector<Vector2>
+  GenerateRotatedEllipseSector(float a, float b, float phi, float thetaStart,
+                               float thetaEnd, int steps);
 };

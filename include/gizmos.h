@@ -7,4 +7,5 @@ private:
 public:
   void Update();
   void Draw();
+  void DrawUI();
 };
