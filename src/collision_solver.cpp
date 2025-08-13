@@ -48,7 +48,7 @@ CollisionResult::CollisionResult(bool col, Vector2 pen, Vector2 norm)
 
 void CollisionSolver::projectCircle(const Circle *circle, const Vector2 &axis,
                                     float &min, float &max) {
-  float center_projection = Utils::dot(circle->center, axis);
+  float center_projection = Utils::Dot(circle->center, axis);
   min = center_projection - circle->radius;
   max = center_projection + circle->radius;
 }
@@ -57,10 +57,10 @@ void CollisionSolver::projectRectangle(const OrientedRectangle *rect,
                                        const Vector2 &axis, float &min,
                                        float &max) {
   auto vertices = rect->getVertices();
-  min = max = Utils::dot(vertices[0], axis);
+  min = max = Utils::Dot(vertices[0], axis);
 
   for (size_t i = 1; i < vertices.size(); i++) {
-    float projection = Utils::dot(vertices[i], axis);
+    float projection = Utils::Dot(vertices[i], axis);
     min = std::min(min, projection);
     max = std::max(max, projection);
   }
@@ -104,7 +104,7 @@ CollisionResult CollisionSolver::checkCollision(const Shape *shape1,
 // Circle-Circle collision using distance check
 CollisionResult CollisionSolver::checkCollision(const Circle *c1,
                                                 const Circle *c2) {
-  Vector2 diff = Utils::subtract(c2->center, c1->center);
+  Vector2 diff = Utils::Subtract(c2->center, c1->center);
   float distance_sq = diff.x * diff.x + diff.y * diff.y;
   float radius_sum = c1->radius + c2->radius;
 
@@ -117,7 +117,7 @@ CollisionResult CollisionSolver::checkCollision(const Circle *c1,
 
   if (distance > 0) {
     Vector2 normal = {diff.x / distance, diff.y / distance};
-    Vector2 penetration_vec = Utils::multiply(normal, -overlap);
+    Vector2 penetration_vec = Utils::Multiply(normal, -overlap);
     return CollisionResult(true, penetration_vec, normal);
   } else {
     // Circles are at exact same position
@@ -156,15 +156,15 @@ CollisionResult CollisionSolver::checkCollision(const OrientedRectangle *r1,
       separation_axis = axis;
 
       // Make sure separation axis points from r1 to r2
-      Vector2 center_diff = Utils::subtract(r2->center, r1->center);
-      if (Utils::dot(separation_axis, center_diff) < 0) {
-        separation_axis = Utils::multiply(separation_axis, -1.0f);
+      Vector2 center_diff = Utils::Subtract(r2->center, r1->center);
+      if (Utils::Dot(separation_axis, center_diff) < 0) {
+        separation_axis = Utils::Multiply(separation_axis, -1.0f);
       }
     }
   }
 
-  Vector2 normal = Utils::normalize(separation_axis);
-  Vector2 penetration_vec = Utils::multiply(normal, -min_overlap);
+  Vector2 normal = Utils::Normalize(separation_axis);
+  Vector2 penetration_vec = Utils::Multiply(normal, -min_overlap);
   return CollisionResult(true, penetration_vec, normal);
 }
 
@@ -183,7 +183,7 @@ CollisionResult CollisionSolver::checkCollision(const Circle *circle,
   Vector2 closest_vertex;
 
   for (const auto &vertex : vertices) {
-    Vector2 diff = Utils::subtract(circle->center, vertex);
+    Vector2 diff = Utils::Subtract(circle->center, vertex);
     float dist_sq = diff.x * diff.x + diff.y * diff.y;
     if (dist_sq < closest_dist_sq) {
       closest_dist_sq = dist_sq;
@@ -192,9 +192,9 @@ CollisionResult CollisionSolver::checkCollision(const Circle *circle,
   }
 
   // Add axis from closest vertex to circle center
-  Vector2 vertex_to_circle = Utils::subtract(circle->center, closest_vertex);
+  Vector2 vertex_to_circle = Utils::Subtract(circle->center, closest_vertex);
   if (vertex_to_circle.x != 0 || vertex_to_circle.y != 0) {
-    axes.push_back(Utils::normalize(vertex_to_circle));
+    axes.push_back(Utils::Normalize(vertex_to_circle));
   }
 
   float min_overlap = std::numeric_limits<float>::max();
@@ -215,15 +215,15 @@ CollisionResult CollisionSolver::checkCollision(const Circle *circle,
       separation_axis = axis;
 
       // Make sure separation axis points from circle to rect
-      Vector2 center_diff = Utils::subtract(rect->center, circle->center);
-      if (Utils::dot(separation_axis, center_diff) < 0) {
-        separation_axis = Utils::multiply(separation_axis, -1.0f);
+      Vector2 center_diff = Utils::Subtract(rect->center, circle->center);
+      if (Utils::Dot(separation_axis, center_diff) < 0) {
+        separation_axis = Utils::Multiply(separation_axis, -1.0f);
       }
     }
   }
 
-  Vector2 normal = Utils::normalize(separation_axis);
-  Vector2 penetration_vec = Utils::multiply(normal, -min_overlap);
+  Vector2 normal = Utils::Normalize(separation_axis);
+  Vector2 penetration_vec = Utils::Multiply(normal, -min_overlap);
   return CollisionResult(true, penetration_vec, normal);
 }
 
@@ -232,9 +232,9 @@ CollisionResult CollisionSolver::checkCollision(const OrientedRectangle *rect,
                                                 const Circle *circle) {
   CollisionResult result = checkCollision(circle, rect);
   // Flip the penetration vector since we swapped the order
-  result.penetration = Utils::multiply(result.penetration, -1.0f);
+  result.penetration = Utils::Multiply(result.penetration, -1.0f);
   // Also flip the normal
-  result.normal = Utils::multiply(result.normal, -1.0f);
+  result.normal = Utils::Multiply(result.normal, -1.0f);
   return result;
 }
 
@@ -242,9 +242,9 @@ CollisionResult CollisionSolver::checkCollision(const OrientedRectangle *rect,
 void CollisionSolver::resolveCollisionSimple(Vector2 &velocity,
                                              const Vector2 &normal) {
   // Remove velocity component in the direction of collision
-  float velAlongNormal = Utils::dot(velocity, normal);
+  float velAlongNormal = Utils::Dot(velocity, normal);
   if (velAlongNormal < 0) { // Only if moving towards the collision
-    Vector2 velocityNormal = Utils::multiply(normal, velAlongNormal);
-    velocity = Utils::subtract(velocity, velocityNormal);
+    Vector2 velocityNormal = Utils::Multiply(normal, velAlongNormal);
+    velocity = Utils::Subtract(velocity, velocityNormal);
   }
 }

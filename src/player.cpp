@@ -21,7 +21,8 @@ Player::Player()
                             GRID_SIZE / 2.0f)),
       forceMult(36.0f), epsilon(0.01f), dashMagnitude(10), maxVelocity(10),
       velocity{0.0f, 0.0f}, dashVelocity{0.0f, 0.0f},
-      movementVelocity{0.0f, 0.0f}, hitInvulDelta(0.7), hp(3), maxHp(3) {}
+      movementVelocity{0.0f, 0.0f}, hitInvulDelta(0.7), hp(3), maxHp(3),
+      lastHitTime(-10000) {}
 
 void Player::Update() {
   float deltaTime = GetFrameTime();
@@ -39,16 +40,16 @@ void Player::Update() {
 
   translation.x = translation.x + dx;
   translation.y = translation.y + dy;
-  collider_shape->center = Utils::add(translation, Utils::multiply(size, 0.5f));
+  colliderShape->center = Utils::Add(translation, Utils::Multiply(size, 0.5f));
 
   for (auto tile : Config::Get().terrain.tiles) {
-    if (!tile.collider_shape || !tile.use_physics)
+    if (!tile.colliderShape || !tile.usePhysics)
       continue;
     CollisionResult result =
-        CollisionSolver::checkCollision(collider_shape, tile.collider_shape);
+        CollisionSolver::checkCollision(colliderShape, tile.colliderShape);
     if (!result.colliding)
       continue;
-    translation = Utils::add(translation, result.penetration);
+    translation = Utils::Add(translation, result.penetration);
     CollisionSolver::resolveCollisionSimple(velocity, result.normal);
   }
 
@@ -56,22 +57,17 @@ void Player::Update() {
     if (!target.ready)
       continue;
     CollisionResult result =
-        CollisionSolver::checkCollision(collider_shape, target.collider_shape);
+        CollisionSolver::checkCollision(colliderShape, target.colliderShape);
     if (!result.colliding)
       continue;
     target.Reach();
   }
 
   for (auto enemy : Config::Get().enemies) {
-    if (!enemy.collider_shape || lastHitTime + hitInvulDelta > GetTime())
+    if (!enemy.colliderShape || lastHitTime + hitInvulDelta > GetTime())
       continue;
     CollisionResult result =
-        CollisionSolver::checkCollision(collider_shape, enemy.collider_shape);
-    std::cout << result.colliding << std::endl;
-    std::cout << collider_shape->center.x << " " << collider_shape->center.y
-              << std::endl;
-    std::cout << enemy.collider_shape->center.x << " "
-              << enemy.collider_shape->center.y << std::endl;
+        CollisionSolver::checkCollision(colliderShape, enemy.colliderShape);
     if (!result.colliding)
       continue;
     GetHit();
@@ -82,6 +78,7 @@ void Player::GetHit() {
   hp -= 1;
   lastHitTime = GetTime();
   if (hp < 1) {
+    Config::Get().win = false;
   }
 }
 
@@ -154,7 +151,7 @@ void Player::HandleUserInput() {
 }
 
 void Player::Draw() {
-  Vector2 center = Utils::add(translation, Utils::multiply(size, 0.5f));
+  Vector2 center = Utils::Add(translation, Utils::Multiply(size, 0.5f));
   DrawCircle(center.x, center.y, size.x, GREEN);
   if (Config::Get().gizmosUIEnabled) {
     DrawGizmos();
@@ -167,17 +164,16 @@ void Player::DrawUI() {
   Vector2 offset = {20, 20};
   Vector2 hpSize = {40, 40};
 
-  for (int i = 0; i < maxHp; i++) {
+  for (int i = 1; i <= maxHp; i++) {
     Color current = i <= hp ? hpColor : missingColor;
-    Vector2 position = Utils::add(offset, {(hpSize.x + 20) * i, 0});
+    Vector2 position =
+        Utils::Add(offset, {(hpSize.x + 20) * i - hpSize.x - 20, 0});
     DrawRectangleV(position, hpSize, current);
   }
 }
 
 void Player::DrawGizmos() {
-  GuiLabel((Rectangle){10, 30, 100, 50},
-           TextFormat("Velocity: %.1f x %.1f", velocity.x, velocity.y));
-  ShapeDrawer::DrawShape(collider_shape);
+  ShapeDrawer::DrawShape(colliderShape);
   float playerVelocityLen = 10;
   DrawLine(static_cast<int>(translation.x + size.x / 2),
            static_cast<int>(translation.y + size.y / 2),

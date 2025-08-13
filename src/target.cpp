@@ -56,7 +56,7 @@ void Target::Draw() {
     return;
   }
   if (Config::Get().gizmosUIEnabled) {
-    ShapeDrawer::DrawShape(collider_shape);
+    ShapeDrawer::DrawShape(colliderShape);
   }
   Color startChargeColor = BLUE;
   Color endChargeColor = DARKPURPLE;
@@ -67,13 +67,13 @@ void Target::Draw() {
     if (GetTime() > startChargeTime) {
       float factor = (GetTime() - startChargeTime) / chargingDelta;
       Color current = ColorLerp(startChargeColor, endChargeColor, factor);
-      DrawRectangleV(Utils::subtract(translation, Utils::multiply(size, 0.5f)),
+      DrawRectangleV(Utils::Subtract(translation, Utils::Multiply(size, 0.5f)),
                      size, current);
     } else {
       float factor =
           (GetTime() - startChargeTime + chargingDelta) / chargingDelta;
       Color current = ColorLerp(initialColor, startChargeColor, factor);
-      DrawRectangleV(Utils::subtract(translation, Utils::multiply(size, 0.5f)),
+      DrawRectangleV(Utils::Subtract(translation, Utils::Multiply(size, 0.5f)),
                      size, current);
     }
   } else {
@@ -82,7 +82,7 @@ void Target::Draw() {
     unsigned char opacity =
         static_cast<unsigned char>((factor * (1 - factor) * 255));
     Color current = ColorLerp(readyColor, {255, 255, 255, opacity}, factor);
-    DrawRectangleV(Utils::subtract(translation, Utils::multiply(size, 0.5f)),
+    DrawRectangleV(Utils::Subtract(translation, Utils::Multiply(size, 0.5f)),
                    size, current);
   }
 }

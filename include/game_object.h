@@ -7,14 +7,14 @@ class GameObject {
 public:
   Vector2 translation;
   Vector2 size;
-  Shape *collider_shape;
-  bool use_physics;
+  Shape *colliderShape;
+  bool usePhysics;
   bool enabled;
 
   inline GameObject(const Vector2 &_translation, const Vector2 &_size,
-                    Shape *_collider_shape = nullptr,
-                    const bool &_use_physics = false)
-      : translation(_translation), size(_size), collider_shape(_collider_shape),
+                    Shape *_colliderShape = nullptr,
+                    const bool &_usePhysics = false)
+      : translation(_translation), size(_size), colliderShape(_colliderShape),
         enabled(true) {}
 
   virtual void Draw() {};
@@ -22,7 +22,7 @@ public:
   virtual void Update() {};
 
   inline virtual void Reset() {
-    use_physics = false;
+    usePhysics = false;
     enabled = true;
   };
 

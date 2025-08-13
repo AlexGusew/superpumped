@@ -56,7 +56,7 @@ void Terrain::load(const std::string &_path) {
   }
 }
 
-void Terrain::generate_tiles() {
+void Terrain::generateTiles() {
   tiles.clear();
 
   if (positions.empty()) {

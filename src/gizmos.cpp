@@ -2,7 +2,6 @@
 #include "config.h"
 #include "constants.h"
 
-#define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
 void Gizmos::Update() {
@@ -37,13 +36,13 @@ void Gizmos::DrawUI() {
     return;
   }
 
-  if (GuiButton({10, 10, 100, 20}, panelOpen ? "Hide Gizmos" : "Show Gizmos")) {
+  if (GuiButton({10, 80, 100, 20}, panelOpen ? "Hide Gizmos" : "Show Gizmos")) {
     panelOpen = !panelOpen;
   }
 
   if (panelOpen) {
     bool gizmosEnabled = Config::Get().gizmosEnabled;
-    if (GuiCheckBox({20, 40, 20, 20}, "Draw gizmos", &gizmosEnabled)) {
+    if (GuiCheckBox({10, 110, 20, 20}, "Draw gizmos", &gizmosEnabled)) {
       Config::Get().gizmosEnabled = gizmosEnabled;
     }
   }

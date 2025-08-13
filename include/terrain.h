@@ -17,6 +17,6 @@ public:
   ~Terrain() = default;
 
   void load(const std::string &_path);
-  void generate_tiles();
+  void generateTiles();
   void clear();
 };

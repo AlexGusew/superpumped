@@ -6,9 +6,9 @@
 using std::string;
 
 Tile::Tile(const string &tile_id, const Vector2 &_translation,
-           const Vector2 &_size, Shape *_collider_shape = nullptr,
-           const bool &_use_physics)
-    : GameObject(_translation, _size, _collider_shape), id(tile_id) {}
+           const Vector2 &_size, Shape *_colliderShape = nullptr,
+           const bool &_usePhysics)
+    : GameObject(_translation, _size, _colliderShape), id(tile_id) {}
 
 void Tile::Draw(TextureDrawer &drawer) {
   drawer.Draw(id, translation);
@@ -17,4 +17,4 @@ void Tile::Draw(TextureDrawer &drawer) {
   }
 }
 
-void Tile::DrawGizmos() { ShapeDrawer::DrawShape(collider_shape); }
+void Tile::DrawGizmos() { ShapeDrawer::DrawShape(colliderShape); }

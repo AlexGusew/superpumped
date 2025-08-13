@@ -11,40 +11,41 @@ Enemy::Enemy(Vector2 _controlingPivot, float _controllingRange)
                  new OrientedRectangle(_controlingPivot,
                                        {GRID_SIZE * 2, GRID_SIZE * 2})),
       controllingRange(_controllingRange), following(false),
-      triggerCollider(_controlingPivot, {GRID_SIZE, GRID_SIZE}),
-      controllingPivot(_controlingPivot), target(_controlingPivot) {};
+      controllingPivot(_controlingPivot), target(_controlingPivot),
+      maxFromPivotDist(500), triggerDist(300), minToTargetDist(5) {};
 
 void Enemy::Draw() {
-  DrawRectangleV(translation, size, {255, 0, 0, 120});
-  if (Config::Get().gizmosUIEnabled)
-    ShapeDrawer::DrawShape(&triggerCollider);
+  DrawRectangleV(Utils::Subtract(translation, Utils::Multiply(size, 0.5)), size,
+                 {255, 0, 0, 120});
+  if (Config::Get().gizmosUIEnabled) {
+    ShapeDrawer::DrawShape(colliderShape);
+  }
 }
 
 void Enemy::Update() {
   Player &player = Config::Get().player;
   float distToPivot =
-      Utils::magnitude(Utils::subtract(translation, controllingPivot));
+      Utils::Magnitude(Utils::Subtract(translation, controllingPivot));
   float distToPlayer =
-      Utils::magnitude(Utils::subtract(translation, player.translation));
+      Utils::Magnitude(Utils::Subtract(translation, player.translation));
 
-  if (std::abs(distToPlayer) < 300) {
+  if (std::abs(distToPlayer) < triggerDist) {
     target = player.translation;
   }
 
-  if (distToPivot > 500) {
+  if (distToPivot > maxFromPivotDist) {
     target = controllingPivot;
   }
 
-  float distToTarget = Utils::magnitude(Utils::subtract(translation, target));
+  float distToTarget = Utils::Magnitude(Utils::Subtract(translation, target));
 
-  if (distToTarget <= 10) {
+  if (distToTarget <= minToTargetDist) {
     return;
   }
 
-  Vector2 dir = Utils::subtract(translation, target);
-  dir = Utils::normalize(dir);
-  dir = Utils::multiply(dir, -70 * GetFrameTime());
-  translation = Utils::add(translation, dir);
-  triggerCollider.center = translation;
-  collider_shape->center = translation;
+  Vector2 dir = Utils::Subtract(translation, target);
+  dir = Utils::Normalize(dir);
+  dir = Utils::Multiply(dir, -70 * GetFrameTime());
+  translation = Utils::Add(translation, dir);
+  colliderShape->center = translation;
 }
