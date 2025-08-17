@@ -59,6 +59,8 @@ private:
 public:
   static CollisionResult checkCollision(const Shape *shape1,
                                         const Shape *shape2);
+  static bool pointRectCollision(const Rectangle &rectangle,
+                                 const Vector2 point);
 
   static CollisionResult checkCollision(const Circle *c1, const Circle *c2);
   static CollisionResult checkCollision(const OrientedRectangle *r1,
@@ -67,6 +69,8 @@ public:
                                         const OrientedRectangle *rect);
   static CollisionResult checkCollision(const OrientedRectangle *rect,
                                         const Circle *circle);
+  static CollisionResult checkCollision(const OrientedRectangle *rect,
+                                        const Vector2 *point);
 
   static void resolveCollision(Vector2 &vel1, Vector2 &vel2,
                                const Vector2 &normal, float mass1 = 1.0f,

@@ -1,4 +1,5 @@
 #include "collision_solver.h"
+#include "raylib.h"
 #include "utils.h"
 #include <cmath>
 
@@ -51,6 +52,12 @@ void CollisionSolver::projectCircle(const Circle *circle, const Vector2 &axis,
   float center_projection = Utils::Dot(circle->center, axis);
   min = center_projection - circle->radius;
   max = center_projection + circle->radius;
+}
+
+bool CollisionSolver::pointRectCollision(const Rectangle &rectangle,
+                                         const Vector2 point) {
+  return point.x > rectangle.x && point.x < rectangle.x + rectangle.width &&
+         point.y > rectangle.y && point.y < rectangle.y + rectangle.height;
 }
 
 void CollisionSolver::projectRectangle(const OrientedRectangle *rect,

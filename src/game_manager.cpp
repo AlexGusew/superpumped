@@ -1,11 +1,22 @@
 #include "game_manager.h"
 #include "config.h"
 #include "constants.h"
+#include "raygui.h"
+#include "raylib.h"
 #include "utils.h"
 #include <iostream>
+#include <ostream>
 
-void GameManager::Init() {
-  track = LoadSound("Sub Urban - Cradles [NCS Release].mp3");
+void GameManager::Init(float _bpm, float _startTimePadding) {
+  track = LoadMusicStream("Sub Urban - Cradles [NCS Release].mp3");
+  // track = LoadMusicStream("Sub Urban - Cradles [NCS Release] - short.mp3");
+  track.looping = false;
+  playedTime = 0.0f;
+  bpm = _bpm;
+  startTimePadding = _startTimePadding;
+  currentBeat = 1;
+  timePerBit = 60.f / bpm;
+
   times = {{3.037974684},
            {4.556962025},
            {6.075949367},
@@ -28,9 +39,18 @@ void GameManager::Reset() {
   float h = GetScreenHeight();
   float w = GetScreenWidth();
 
+  playedTime = 0.0f;
+  currentBeat = 1;
+  SetMusicTime(0.0f);
   config.player.Reset();
   player.translation = {h / 2, w / 2};
-  StopSound(track);
+  perfectDashTimes.clear();
+
+  StopMusicStream(track);
+}
+
+void GameManager::SetMusicTime(float newTime) {
+  SeekMusicStream(track, newTime + startTimePadding);
 }
 
 void GameManager::Start() {
@@ -39,7 +59,7 @@ void GameManager::Start() {
   config.gameState = GameState::PLAY;
   float h = GetScreenHeight();
 
-  PlaySound(track);
+  PlayMusicStream(track);
 
   for (size_t i = 0; i < std::size(times); i++) {
     float el_h = GetRandomValue(200, 300);
@@ -67,24 +87,69 @@ void GameManager::Start() {
   }
 }
 
+void GameManager::FinishGame(bool win) {
+  Config &config = Config::Get();
+  config.gameState = GameState::GAME_OVER;
+  config.win = win;
+  config.lastHighScore = std::max(config.score, config.lastHighScore);
+}
+
 void GameManager::Update() {
   Config &config = Config::Get();
-
-  if (IsKeyPressed(KEY_R)) {
-    GameManager::Reset();
-    GameManager::Start();
+  if (IsMusicStreamPlaying(track)) {
+    playedTime += GetFrameTime();
   }
 
-  if (config.player.hp <= 0) {
-    config.gameState = GameState::GAME_OVER;
-    config.win = false;
-    config.lastHighScore = std::max(config.score, config.lastHighScore);
+  UpdateMusicStream(track);
 
+  currentBeat = (playedTime + startTimePadding) / timePerBit;
+
+  if (playedTime >= GetMusicTimeLength(track)) {
+    FinishGame(true);
+    GameManager::Reset();
+  } else if (IsKeyPressed(KEY_R)) {
+    GameManager::Reset();
+    GameManager::Start();
+  } else if (config.player.hp <= 0) {
+    FinishGame(false);
     GameManager::Reset();
   }
 }
 
 void GameManager::Destroy() {
-  UnloadSound(track);
+  UnloadMusicStream(track);
   CloseAudioDevice();
+}
+
+void GameManager::DrawUI() {
+  float w = GetScreenWidth();
+  float h = GetScreenHeight();
+  DrawText(TextFormat("Beat %d", Config::Get().gameManager.currentBeat + 1),
+           w - 180.0f, h - 40.0f, 20, WHITE);
+  float bitStartTime = currentBeat * timePerBit;
+  float delta = playedTime - bitStartTime;
+  float factor = 1 - delta / timePerBit;
+  DrawCircle(
+      w - 30, h - 30, 20,
+      {255, 0, 0, static_cast<unsigned char>(100 + factor * (255 - 100))});
+  for (auto &time : perfectDashTimes) {
+    if (playedTime - time < 2) {
+      float shift = (playedTime - time) / 2;
+      DrawText(
+          "Perfect dash +x1", w - 180.0f, h - 100.0f - (shift * 40), 20,
+          {255, 255, 255, static_cast<unsigned char>(255 * (1.0f - shift))});
+    }
+  }
+}
+
+void GameManager::Dash() {
+  float perfectDashThreashold = 0.2f;
+  float bitStartTime = currentBeat * timePerBit;
+  float delta = playedTime - bitStartTime;
+  float factor = delta / timePerBit;
+
+  if (factor < perfectDashThreashold || 1 - factor < perfectDashThreashold) {
+    Config::Get().scoreMult += 1;
+    perfectDashTimes.push_back(playedTime);
+  }
 }

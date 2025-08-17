@@ -9,8 +9,6 @@
 #include "utils.h"
 #include <algorithm>
 #include <cmath>
-#include <iostream>
-#include <ostream>
 
 // TODO: Make Player inherited from GameObject
 Player::Player()
@@ -42,7 +40,7 @@ void Player::Update() {
   translation.y = translation.y + dy;
   colliderShape->center = Utils::Add(translation, Utils::Multiply(size, 0.5f));
 
-  for (auto tile : Config::Get().terrain.tiles) {
+  for (auto &tile : Config::Get().terrain.tiles) {
     if (!tile.colliderShape || !tile.usePhysics)
       continue;
     CollisionResult result =
@@ -63,7 +61,7 @@ void Player::Update() {
     target.Reach();
   }
 
-  for (auto enemy : Config::Get().enemies) {
+  for (auto &enemy : Config::Get().enemies) {
     if (!enemy.colliderShape || lastHitTime + hitInvulDelta > GetTime())
       continue;
     CollisionResult result =
@@ -112,6 +110,8 @@ void Player::HandleDash() {
 
     dashVelocity.x += unit.x;
     dashVelocity.y += unit.y;
+
+    Config::Get().gameManager.Dash();
   }
 
   dashVelocity.x *= 0.9f;

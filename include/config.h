@@ -22,7 +22,8 @@ public:
   std::vector<Enemy> enemies;
   Player player;
   GameManager gameManager;
-  GameState gameState = GameState::PLAY;
+  GameState gameState = GameState::EDITOR;
+  Camera2D mainCamera;
 
   static Config &Get();
   Config(const Config &) = delete;

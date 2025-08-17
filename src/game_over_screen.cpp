@@ -31,4 +31,8 @@ void GameOverScreen::Draw() {
   }
 }
 
-void GameOverScreen::Update() {}
+void GameOverScreen::Update() {
+  if (IsKeyPressed(KEY_R)) {
+    Config::Get().gameManager.Start();
+  }
+}
