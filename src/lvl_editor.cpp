@@ -10,7 +10,6 @@
 #include <cstddef>
 #include <cstring>
 #include <iostream>
-#include <iterator>
 #include <ostream>
 #include <tuple>
 #include <vector>
@@ -94,6 +93,9 @@ void LvlEditor::Init() {
                              20}; // Duration textbox
   gui.splineLayoutRecs[9] = {splineAnchor.x + 76, splineAnchor.y + 150, 60,
                              20}; // Duration value label
+                                  //
+  timelineGUI.bg = {0, h - 90, w, 90};
+  timelineGUI.track = {0, h - 90, w, 20};
 }
 // LabelButton: timeSignatureLabel logic
 static void TimeSignatureLabel() {
@@ -123,18 +125,18 @@ void LvlEditor::DrawUI() {
   float totalBeats = trackTotalTime / gm.timePerBit;
   float eachBeatLen = w / totalBeats;
 
-  DrawRectangle(0, h - 90, w, 90, {25, 25, 25, 255});
-  DrawRectangle(0, h - 90, w, 20, {0, 30, 55, 255});
+  DrawRectangle(timelineGUI.bg.x, timelineGUI.bg.y, timelineGUI.bg.width,
+                timelineGUI.bg.height, {25, 25, 25, 255});
+  DrawRectangle(timelineGUI.track.x, timelineGUI.track.y,
+                timelineGUI.track.width, timelineGUI.track.height,
+                {0, 30, 55, 255});
   for (size_t i = 0; i < splines.size(); i++) {
-    Spline &spline = splines[i];
-    float x = spline.startTime / trackTotalTime * w;
-    float width = spline.duration / trackTotalTime * w;
-    float pointW = width / spline.amount;
-    DrawRectangle(x, h - 90, width, 20,
+    SplineGUI &sGUI = timelineGUI.splines[i];
+    DrawRectangle(sGUI.wrapper.x, sGUI.wrapper.y, sGUI.wrapper.width,
+                  sGUI.wrapper.height,
                   ColorAlpha(GREEN, i == curSpline ? 0.6 : 0.3));
-    for (size_t j = 0; j < spline.amount; j++) {
-      DrawLine(x + pointW * j, h - 90, x + pointW * j, h - 90 + 20,
-               ColorAlpha(GREEN, 0.4));
+    for (auto &line : sGUI.lines) {
+      DrawLineV(line.first, line.second, ColorAlpha(GREEN, 0.4));
     }
   }
 
@@ -284,6 +286,12 @@ void LvlEditor::Update() {
   float w = GetScreenWidth();
   float h = GetScreenHeight();
   float trackTotalTime = GetMusicTimeLength(track);
+  float totalBeats = trackTotalTime / gm.timePerBit;
+  float eachBeatLen = w / totalBeats;
+  Rectangle timelineCollider = {0, h - 115, w, 25};
+
+  mousePos = GetMousePosition();
+  mouseWorldPos = GetScreenToWorld2D(mousePos, camera);
 
   if (!pause) {
     curTime += GetFrameTime();
@@ -297,21 +305,16 @@ void LvlEditor::Update() {
     OnPause();
   }
 
-  mousePos = GetMousePosition();
-  mouseWorldPos = GetScreenToWorld2D(mousePos, camera);
-  Rectangle timelineCollider = {0, h - 115, w, 25};
   timelineHover = mousePos.x > timelineCollider.x &&
                   mousePos.x < timelineCollider.x + timelineCollider.width &&
                   mousePos.y > timelineCollider.y &&
                   mousePos.y < timelineCollider.y + timelineCollider.height;
-  if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-    if (timelineHover) {
-      float snap = 1.0f / 1.0f;
-      float snapTime = Config::Get().gameManager.timePerBit * snap;
-      curTime = mousePos.x / w * trackTotalTime + snapTime / 2;
-      curTime -= std::fmod(curTime, snapTime);
-      gm.SetMusicTime(curTime);
-    }
+  if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && timelineHover) {
+    float snap = 1.0f / 1.0f;
+    float snapTime = Config::Get().gameManager.timePerBit * snap;
+    curTime = mousePos.x / w * trackTotalTime + snapTime / 2;
+    curTime -= std::fmod(curTime, snapTime);
+    gm.SetMusicTime(curTime);
   }
 
   if (IsKeyPressed(KEY_R)) {
@@ -320,17 +323,74 @@ void LvlEditor::Update() {
   }
 
   if (curSpline != -1 && IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_D)) {
-    Spline newSpline = Spline{splines[curSpline]};
-    for (Vector2 &point : newSpline.points) {
-      point = Utils::Add(point, {50, 0});
-    }
-    splines.push_back(newSpline);
+    DuplicateSpline(curTime, splines[curSpline]);
   }
 
   UpdateSplines();
   UpdateCamera();
-
   UpdateMusicStream(track);
+}
+
+void LvlEditor::DuplicateSpline(float time, Spline &referenceSpline) {
+  GameManager &gm = Config::Get().gameManager;
+  float w = GetScreenWidth();
+  float h = GetScreenHeight();
+
+  Spline newSpline = Spline{referenceSpline};
+
+  newSpline.startTime = time;
+  for (Vector2 &point : newSpline.points) {
+    point = Utils::Add(point, {50, 0});
+  }
+  splines.push_back(newSpline);
+  SplineGUI splineGUI = NewSplineGUI(newSpline);
+  timelineGUI.splines.push_back(splineGUI);
+}
+
+SplineGUI LvlEditor::NewSplineGUI(Spline &newSpline) {
+  SplineGUI splineGUI = {.wrapper = {}};
+  for (size_t j = 0; j < newSpline.amount; j++) {
+    splineGUI.lines.push_back(std::make_pair((Vector2){}, (Vector2){}));
+  };
+  return splineGUI;
+}
+
+void LvlEditor::CalculateSplineGUI(Spline &newSpline, SplineGUI &splineGUI) {
+  GameManager &gm = Config::Get().gameManager;
+
+  float w = GetScreenWidth();
+  float h = GetScreenHeight();
+  float trackTotalTime = GetMusicTimeLength(gm.track);
+
+  float x = newSpline.startTime / trackTotalTime * w;
+  float width = newSpline.duration / trackTotalTime * w;
+  float pointW = width / newSpline.amount;
+  splineGUI.wrapper = {x, h - 90, width, 20};
+  for (size_t j = 0; j < newSpline.amount; j++) {
+    splineGUI.lines.push_back(
+        std::make_pair((Vector2){x + pointW * j, h - 90},
+                       (Vector2){x + pointW * j, h - 90 + 20}));
+  };
+}
+
+void LvlEditor::NewSpline(float time, Vector2 &startPoint) {
+  GameManager &gm = Config::Get().gameManager;
+  std::vector<Vector2> newPoints;
+
+  for (int i = 0; i < 4; i++) {
+    newPoints.push_back(startPoint);
+    startPoint = Utils::Add(startPoint, Utils::Multiply({1, 0}, newDistMult));
+  }
+  Spline newSpline = {.points = newPoints,
+                      .type = TargetType::A,
+                      .startTime = time,
+                      .amount = 4,
+                      .duration = 4 * gm.timePerBit,
+                      .startBit = static_cast<float>(time / gm.timePerBit),
+                      .durationBit = 4};
+  splines.push_back(newSpline);
+  SplineGUI splineGUI = NewSplineGUI(newSpline);
+  timelineGUI.splines.push_back(splineGUI);
 }
 
 void LvlEditor::UpdateSplines() {
@@ -361,22 +421,7 @@ void LvlEditor::UpdateSplines() {
     if (isDoubleClick) {
       if (leftPressed && pointNotFound) {
         // Create new spline - now with shared point structure
-        std::vector<Vector2> newPoints;
-        Vector2 point = mouseWorldPos;
-        // First spline: p1, a1, a2, p2
-        for (int i = 0; i < 4; i++) {
-          newPoints.push_back(point);
-          point = Utils::Add(point, Utils::Multiply({1, 0}, newDistMult));
-        }
-        Spline newSpline = {.points = newPoints,
-                            .type = TargetType::A,
-                            .startTime = curTime,
-                            .amount = 4,
-                            .duration = 4 * gm.timePerBit,
-                            .startBit =
-                                static_cast<float>(curTime / gm.timePerBit),
-                            .durationBit = 4};
-        splines.push_back(newSpline);
+        NewSpline(curTime, mouseWorldPos);
       } else if (leftPressed && !pointNotFound) {
         // Extend spline
         std::vector<Vector2> &points = splines[splineIdx].points;
@@ -485,6 +530,10 @@ void LvlEditor::UpdateSplines() {
         }
       }
     }
+  }
+
+  for (size_t i = 0; i < splines.size(); i++) {
+    CalculateSplineGUI(splines[i], timelineGUI.splines[i]);
   }
 }
 

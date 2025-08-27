@@ -39,9 +39,18 @@ typedef struct {
   bool durationEditMode = false;
   bool splinePanelActive = true;
 
-  // Custom state variables (depend on development software)
-  // NOTE: This variables should be added manually if required
 } GuiEditorLayoutState;
+
+typedef struct {
+  Rectangle wrapper;
+  std::vector<std::pair<Vector2, Vector2>> lines;
+} SplineGUI;
+
+typedef struct {
+  Rectangle bg;
+  Rectangle track;
+  std::vector<SplineGUI> splines;
+} TimelineGUI;
 
 typedef struct {
   std::vector<Vector2> points;
@@ -58,6 +67,7 @@ private:
   std::tuple<int, int> FindNearestPoint(Vector2 target, float maxDist);
   Vector2 lastMousePos;
   bool wasPanning;
+  TimelineGUI timelineGUI;
 
 public:
   float curTime = 0.0f;
@@ -79,4 +89,8 @@ public:
   void Draw();
   void DrawUI();
   void OnPause();
+  SplineGUI NewSplineGUI(Spline &newSpline);
+  void CalculateSplineGUI(Spline &newSpline, SplineGUI &splineGUI);
+  void NewSpline(float time, Vector2 &startPoint);
+  void DuplicateSpline(float time, Spline &referenceSpline);
 };
