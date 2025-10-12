@@ -4,6 +4,7 @@
 #include "game_manager.h"
 #include "raygui.h"
 #include "raylib.h"
+#include "timeline.h"
 #include "utils.h"
 #include <algorithm>
 #include <cmath>
@@ -15,6 +16,7 @@
 #include <vector>
 
 void LvlEditor::Init() {
+  splines.reserve(1024);
   gui = {0};
   float w = GetScreenWidth();
   float h = GetScreenHeight();
@@ -93,9 +95,6 @@ void LvlEditor::Init() {
                              20}; // Duration textbox
   gui.splineLayoutRecs[9] = {splineAnchor.x + 76, splineAnchor.y + 150, 60,
                              20}; // Duration value label
-                                  //
-  timelineGUI.bg = {0, h - 90, w, 90};
-  timelineGUI.track = {0, h - 90, w, 20};
 }
 // LabelButton: timeSignatureLabel logic
 static void TimeSignatureLabel() {
@@ -125,32 +124,7 @@ void LvlEditor::DrawUI() {
   float totalBeats = trackTotalTime / gm.timePerBit;
   float eachBeatLen = w / totalBeats;
 
-  DrawRectangle(timelineGUI.bg.x, timelineGUI.bg.y, timelineGUI.bg.width,
-                timelineGUI.bg.height, {25, 25, 25, 255});
-  DrawRectangle(timelineGUI.track.x, timelineGUI.track.y,
-                timelineGUI.track.width, timelineGUI.track.height,
-                {0, 30, 55, 255});
-  for (size_t i = 0; i < splines.size(); i++) {
-    SplineGUI &sGUI = timelineGUI.splines[i];
-    DrawRectangle(sGUI.wrapper.x, sGUI.wrapper.y, sGUI.wrapper.width,
-                  sGUI.wrapper.height,
-                  ColorAlpha(GREEN, i == curSpline ? 0.6 : 0.3));
-    for (auto &line : sGUI.lines) {
-      DrawLineV(line.first, line.second, ColorAlpha(GREEN, 0.4));
-    }
-  }
-
-  for (size_t i = 0; i < totalBeats; i++) {
-    float x = i * eachBeatLen;
-    if (i % 4 == 0) {
-      const char *text = TextFormat("%d", i);
-      float textLen = MeasureText(text, 12);
-      DrawText(text, x - textLen / 2, h - 115, 12, GRAY);
-      DrawLineV({x, h - 100}, {x, h - 90}, GRAY);
-    } else {
-      DrawLineV({x, h - 95}, {x, h - 90}, GRAY);
-    }
-  }
+  timelineGUI.Render();
 
   float arrowX = w * curTime / trackTotalTime;
   DrawLine(arrowX, h - 95, arrowX, h, {255, 255, 255, 120});
@@ -329,6 +303,7 @@ void LvlEditor::Update() {
   UpdateSplines();
   UpdateCamera();
   UpdateMusicStream(track);
+  timelineGUI.Calculate();
 }
 
 void LvlEditor::DuplicateSpline(float time, Spline &referenceSpline) {
@@ -336,41 +311,13 @@ void LvlEditor::DuplicateSpline(float time, Spline &referenceSpline) {
   float w = GetScreenWidth();
   float h = GetScreenHeight();
 
-  Spline newSpline = Spline{referenceSpline};
+  splines.push_back(Spline{referenceSpline});
+  splines.back().startTime = time;
 
-  newSpline.startTime = time;
-  for (Vector2 &point : newSpline.points) {
+  for (Vector2 &point : splines.back().points) {
     point = Utils::Add(point, {50, 0});
   }
-  splines.push_back(newSpline);
-  SplineGUI splineGUI = NewSplineGUI(newSpline);
-  timelineGUI.splines.push_back(splineGUI);
-}
-
-SplineGUI LvlEditor::NewSplineGUI(Spline &newSpline) {
-  SplineGUI splineGUI = {.wrapper = {}};
-  for (size_t j = 0; j < newSpline.amount; j++) {
-    splineGUI.lines.push_back(std::make_pair((Vector2){}, (Vector2){}));
-  };
-  return splineGUI;
-}
-
-void LvlEditor::CalculateSplineGUI(Spline &newSpline, SplineGUI &splineGUI) {
-  GameManager &gm = Config::Get().gameManager;
-
-  float w = GetScreenWidth();
-  float h = GetScreenHeight();
-  float trackTotalTime = GetMusicTimeLength(gm.track);
-
-  float x = newSpline.startTime / trackTotalTime * w;
-  float width = newSpline.duration / trackTotalTime * w;
-  float pointW = width / newSpline.amount;
-  splineGUI.wrapper = {x, h - 90, width, 20};
-  for (size_t j = 0; j < newSpline.amount; j++) {
-    splineGUI.lines.push_back(
-        std::make_pair((Vector2){x + pointW * j, h - 90},
-                       (Vector2){x + pointW * j, h - 90 + 20}));
-  };
+  timelineGUI.NewSplineGUI(splines.back());
 }
 
 void LvlEditor::NewSpline(float time, Vector2 &startPoint) {
@@ -381,16 +328,15 @@ void LvlEditor::NewSpline(float time, Vector2 &startPoint) {
     newPoints.push_back(startPoint);
     startPoint = Utils::Add(startPoint, Utils::Multiply({1, 0}, newDistMult));
   }
-  Spline newSpline = {.points = newPoints,
-                      .type = TargetType::A,
-                      .startTime = time,
-                      .amount = 4,
-                      .duration = 4 * gm.timePerBit,
-                      .startBit = static_cast<float>(time / gm.timePerBit),
-                      .durationBit = 4};
-  splines.push_back(newSpline);
-  SplineGUI splineGUI = NewSplineGUI(newSpline);
-  timelineGUI.splines.push_back(splineGUI);
+  splines.emplace_back(
+      Spline{.points = newPoints,
+             .type = TargetType::A,
+             .startTime = time,
+             .amount = 4,
+             .duration = 4 * gm.timePerBit,
+             .startBit = static_cast<float>(time / gm.timePerBit),
+             .durationBit = 4});
+  timelineGUI.NewSplineGUI(splines.back());
 }
 
 void LvlEditor::UpdateSplines() {
@@ -530,10 +476,6 @@ void LvlEditor::UpdateSplines() {
         }
       }
     }
-  }
-
-  for (size_t i = 0; i < splines.size(); i++) {
-    CalculateSplineGUI(splines[i], timelineGUI.splines[i]);
   }
 }
 

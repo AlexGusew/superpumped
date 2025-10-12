@@ -1,11 +1,10 @@
 #pragma once
 
 #include "raylib.h"
+#include "timeline.h"
 #include <vector>
 
-enum class TargetType { A, B };
-
-typedef struct {
+typedef struct GuiEditorLayoutState {
   // Define anchors
   Vector2 anchor01; // ANCHOR ID:1
 
@@ -41,35 +40,14 @@ typedef struct {
 
 } GuiEditorLayoutState;
 
-typedef struct {
-  Rectangle wrapper;
-  std::vector<std::pair<Vector2, Vector2>> lines;
-} SplineGUI;
-
-typedef struct {
-  Rectangle bg;
-  Rectangle track;
-  std::vector<SplineGUI> splines;
-} TimelineGUI;
-
-typedef struct {
-  std::vector<Vector2> points;
-  TargetType type;
-  float startTime;
-  int amount;
-  float duration;
-  float startBit;
-  float durationBit;
-} Spline;
-
 class LvlEditor {
 private:
   std::tuple<int, int> FindNearestPoint(Vector2 target, float maxDist);
   Vector2 lastMousePos;
   bool wasPanning;
-  TimelineGUI timelineGUI;
 
 public:
+  TimelineGUI timelineGUI;
   float curTime = 0.0f;
   bool pause = true;
   bool timelineHover;
@@ -89,8 +67,6 @@ public:
   void Draw();
   void DrawUI();
   void OnPause();
-  SplineGUI NewSplineGUI(Spline &newSpline);
-  void CalculateSplineGUI(Spline &newSpline, SplineGUI &splineGUI);
   void NewSpline(float time, Vector2 &startPoint);
   void DuplicateSpline(float time, Spline &referenceSpline);
 };

@@ -4,6 +4,7 @@
 #include "raygui.h"
 #include "raylib.h"
 #include "utils.h"
+#include <cstdlib>
 #include <iostream>
 #include <ostream>
 
@@ -69,10 +70,12 @@ void GameManager::Start() {
     float thetaStart =
         Utils::Deg2Rad(static_cast<float>(GetRandomValue(0, 360)));
     float thetaWidth =
-        Utils::Deg2Rad(static_cast<float>(GetRandomValue(30, 160)));
+        Utils::Deg2Rad(static_cast<float>(GetRandomValue(0, 360)));
     float thetaEnd = thetaStart + thetaWidth;
 
-    int steps = times[i].size();
+    int steps = std::rand() % 100 + 3;
+    std::cout << steps << std::endl;
+    // int steps = times[i].size();
 
     Vector2 center{static_cast<float>(i * 200), static_cast<float>(h) * 0.5f};
     if (i % 4 == 0) {

@@ -10,6 +10,7 @@
 #include "target.h"
 #include "terrain.h"
 #include "texture_drawer.h"
+#include "timeline.h"
 
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
@@ -59,6 +60,9 @@ int main() {
   gameManager.Init(80.0f, 0.3f);
 
   while (!WindowShouldClose()) {
+    config.w = w;
+    config.h = h;
+
     if (IsKeyPressed(KEY_E)) {
       config.gameState = GameState::EDITOR;
       gameManager.Reset();
