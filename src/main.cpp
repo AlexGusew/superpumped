@@ -12,16 +12,23 @@
 #include "texture_drawer.h"
 #include "timeline.h"
 
+#include "imgui.h"
+#define NO_FONT_AWESOME
+#include "rlImGui.h"
+
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
 int main() {
-  SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI | FLAG_WINDOW_RESIZABLE);
+  SetConfigFlags(FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI |
+                 FLAG_WINDOW_RESIZABLE);
   InitWindow(1280, 800, "Hello superpumped");
   SetTargetFPS(60);
   SearchAndSetResourceDir("resources");
   InitAudioDevice();
   GuiLoadStyle("./style_dark.rgs");
+
+  rlImGuiSetup(true);
 
   TextureDrawer spritesheet("spritesheet.png",
                             {
@@ -83,6 +90,22 @@ int main() {
       BeginDrawing();
       BeginMode2D(camera);
       ClearBackground(BLACK);
+
+      // start ImGui Conent
+      rlImGuiBegin();
+
+      // show ImGui Content
+      bool open = true;
+
+      open = true;
+      if (ImGui::Begin("Test Window", &open)) {
+        ImGui::TextUnformatted("My clever text that will be legendary");
+      }
+      ImGui::End();
+
+      // end ImGui Content
+      rlImGuiEnd();
+
       gizmos.Draw();
       for (Tile &tile : config.terrain.tiles) {
         tile.Draw(spritesheet);
@@ -127,6 +150,7 @@ int main() {
     }
   }
   gameManager.Destroy();
+  rlImGuiShutdown();
   CloseWindow();
 
   return 0;
