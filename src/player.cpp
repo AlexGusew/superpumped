@@ -153,7 +153,7 @@ void Player::HandleUserInput() {
 void Player::Draw() {
   Vector2 center = Utils::Add(translation, Utils::Multiply(size, 0.5f));
   DrawCircle(center.x, center.y, size.x, GREEN);
-  if (Config::Get().gizmosUIEnabled) {
+  if (Config::Get().gizmosEnabled) {
     DrawGizmos();
   }
 }

@@ -12,7 +12,7 @@ Tile::Tile(const string& tile_id, const Vector2& _translation,
 
 void Tile::Draw(TextureDrawer& drawer) {
   drawer.Draw(id, translation);
-  if (Config::Get().gizmosUIEnabled) {
+  if (Config::Get().gizmosEnabled) {
     DrawGizmos();
   }
 }

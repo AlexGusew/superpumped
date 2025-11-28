@@ -10,9 +10,7 @@
 #include "target.h"
 #include "terrain.h"
 #include "texture_drawer.h"
-#include "timeline.h"
 
-#include "imgui.h"
 #define NO_FONT_AWESOME
 #include "rlImGui.h"
 
@@ -80,7 +78,6 @@ int main() {
         enemy.Update();
       };
       player.Update();
-      gizmos.Update();
       gameManager.Update();
       for (Target& target : config.targets) {
         target.Update();
@@ -90,21 +87,6 @@ int main() {
       BeginDrawing();
       BeginMode2D(camera);
       ClearBackground(BLACK);
-
-      // start ImGui Conent
-      rlImGuiBegin();
-
-      // show ImGui Content
-      bool open = true;
-
-      open = true;
-      if (ImGui::Begin("Test Window", &open)) {
-        ImGui::TextUnformatted("My clever text that will be legendary");
-      }
-      ImGui::End();
-
-      // end ImGui Content
-      rlImGuiEnd();
 
       gizmos.Draw();
       for (Tile& tile : config.terrain.tiles) {
@@ -124,6 +106,7 @@ int main() {
       gizmos.DrawUI();
       player.DrawUI();
       gameManager.DrawUI();
+
       EndDrawing();
     } else if (config.gameState == GameState::GAME_OVER) {
       gameOverScreen.Update();

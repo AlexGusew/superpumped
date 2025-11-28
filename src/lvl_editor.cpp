@@ -1,117 +1,20 @@
 #include "lvl_editor.h"
-#include "collision_solver.h"
 #include "config.h"
 #include "game_manager.h"
+#include "imgui.h"
 #include "raygui.h"
 #include "raylib.h"
+#include "rlImGui.h"
 #include "timeline.h"
 #include "utils.h"
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstring>
-#include <iostream>
-#include <ostream>
 #include <tuple>
 #include <vector>
 
-void LvlEditor::Init() {
-  splines.reserve(1024);
-  gui = {0};
-  float w = GetScreenWidth();
-  float h = GetScreenHeight();
-
-  // Init anchors
-  gui.anchor01 = (Vector2){w - 16.0f, 16.0f}; // ANCHOR ID:1
-
-  // Initilize controls variables
-  gui.panelActive = true; // WindowBox: panel
-  gui.tsPrimaryEditMode = false;
-  strcpy(gui.tsPrimaryText, ""); // TextBox: tsPrimary
-  gui.tsSecondaryEditMode = false;
-  strcpy(gui.tsSecondaryText, ""); // TextBox: tsSecondary
-  gui.snapChecked = false;         // CheckBoxEx: snap
-  gui.bpmEditMode = false;
-  gui.bpmValue = 0; // ValueBOx: bpm
-  gui.currentBPMEditMode = false;
-  gui.currentBPMValue = 0; // ValueBOx: currentBPM
-  gui.currentTimeEditMode = false;
-  gui.currentTimeValue = 0; // ValueBOx: currentTime
-  gui.snapFrequencyEditMode = false;
-  strcpy(gui.snapFrequencyText, ""); // TextBox: snapFrequency
-
-  // Init controls rectangles
-  gui.layoutRecs[0] = (Rectangle){gui.anchor01.x + -160, gui.anchor01.y + 8,
-                                  152, 296}; // WindowBox: panel
-  gui.layoutRecs[1] = (Rectangle){gui.anchor01.x + -144, gui.anchor01.y + 40,
-                                  120, 24}; // Button: pauseButton
-  gui.layoutRecs[2] = (Rectangle){gui.anchor01.x + -144, gui.anchor01.y + 88,
-                                  48, 24}; // TextBox: tsPrimary
-  gui.layoutRecs[3] = (Rectangle){gui.anchor01.x + -88, gui.anchor01.y + 88, 12,
-                                  24}; // Label: Label004
-  gui.layoutRecs[4] = (Rectangle){gui.anchor01.x + -72, gui.anchor01.y + 88, 48,
-                                  24}; // TextBox: tsSecondary
-  gui.layoutRecs[5] = (Rectangle){gui.anchor01.x + -144, gui.anchor01.y + 64,
-                                  120, 24}; // LabelButton: timeSignatureLabel
-  gui.layoutRecs[6] = (Rectangle){gui.anchor01.x + -144, gui.anchor01.y + 120,
-                                  24, 24}; // CheckBoxEx: snap
-  gui.layoutRecs[7] = (Rectangle){gui.anchor01.x + -144, gui.anchor01.y + 144,
-                                  120, 24}; // LabelButton: gui
-  gui.layoutRecs[8] = (Rectangle){gui.anchor01.x + -144, gui.anchor01.y + 168,
-                                  120, 24}; // ValueBOx: bpm
-  gui.layoutRecs[9] = (Rectangle){gui.anchor01.x + -144, gui.anchor01.y + 192,
-                                  120, 24}; // LabelButton: LabelButton009
-  gui.layoutRecs[10] = (Rectangle){gui.anchor01.x + -144, gui.anchor01.y + 216,
-                                   120, 24}; // ValueBOx: currentBPM
-  gui.layoutRecs[11] = (Rectangle){gui.anchor01.x + -144, gui.anchor01.y + 240,
-                                   120, 24}; // LabelButton: LabelButton011
-  gui.layoutRecs[12] = (Rectangle){gui.anchor01.x + -144, gui.anchor01.y + 264,
-                                   120, 24}; // ValueBOx: currentTime
-  gui.layoutRecs[13] = (Rectangle){gui.anchor01.x + -48, gui.anchor01.y + 120,
-                                   24, 24}; // TextBox: snapFrequency
-  Vector2 splineAnchor = {gui.anchor01.x - 160, gui.layoutRecs[0].y +
-                                                    gui.layoutRecs[0].height +
-                                                    gui.anchor01.y + 8};
-  gui.splineWindow = {splineAnchor.x, splineAnchor.y, 144, 300};
-  gui.timelineWindow = {0, h - 115, w, 115};
-
-  gui.splineLayoutRecs[0] = {splineAnchor.x, splineAnchor.y, 144,
-                             300}; // Window
-  gui.splineLayoutRecs[1] = {splineAnchor.x + 8, splineAnchor.y + 24, 60,
-                             20}; // "Start time" label
-  gui.splineLayoutRecs[2] = {splineAnchor.x + 8, splineAnchor.y + 46, 64,
-                             20}; // Start time textbox
-  gui.splineLayoutRecs[3] = {splineAnchor.x + 76, splineAnchor.y + 46, 60,
-                             20}; // Start time value label
-  gui.splineLayoutRecs[4] = {splineAnchor.x + 8, splineAnchor.y + 76, 60,
-                             20}; // "Amount" label
-  gui.splineLayoutRecs[5] = {splineAnchor.x + 8, splineAnchor.y + 98, 64,
-                             20}; // Amount textbox
-  gui.splineLayoutRecs[6] = {splineAnchor.x + 76, splineAnchor.y + 98, 60,
-                             20}; // Amount value label
-  gui.splineLayoutRecs[7] = {splineAnchor.x + 8, splineAnchor.y + 128, 60,
-                             20}; // "Duration" label
-  gui.splineLayoutRecs[8] = {splineAnchor.x + 8, splineAnchor.y + 150, 64,
-                             20}; // Duration textbox
-  gui.splineLayoutRecs[9] = {splineAnchor.x + 76, splineAnchor.y + 150, 60,
-                             20}; // Duration value label
-}
-// LabelButton: timeSignatureLabel logic
-static void TimeSignatureLabel() {
-  // TODO: Implement control logic
-}
-// LabelButton: LabelButton007 logic
-static void LabelButton007() {
-  // TODO: Implement control logic
-}
-// LabelButton: LabelButton009 logic
-static void LabelButton009() {
-  // TODO: Implement control logic
-}
-// LabelButton: LabelButton011 logic
-static void LabelButton011() {
-  // TODO: Implement control logic
-}
+void LvlEditor::Init() { splines.reserve(1024); }
 
 void LvlEditor::DrawUI() {
   Config& config = Config::Get();
@@ -134,94 +37,44 @@ void LvlEditor::DrawUI() {
   DrawTriangle({arrowX, h - 90}, {arrowX + 5, h - 100}, {arrowX - 5, h - 100},
                GREEN);
 
-  // Draw controls
-  if (gui.panelActive) {
-    gui.panelActive = !GuiWindowBox(gui.layoutRecs[0], "Editor Debug");
-    if (GuiButton(gui.layoutRecs[1], pause ? "Play" : "Pause"))
+  rlImGuiBegin();
+  bool debugPanelOpen = true;
+
+  if (ImGui::Begin("Editor Debug", &debugPanelOpen)) {
+    if (ImGui::Button(pause ? "Play (space)" : "Pause (space)")) {
       LvlEditor::OnPause();
-    if (GuiTextBox(gui.layoutRecs[2], gui.tsPrimaryText, 128,
-                   gui.tsPrimaryEditMode))
-      gui.tsPrimaryEditMode = !gui.tsPrimaryEditMode;
-    GuiLabel(gui.layoutRecs[3], "/");
-    if (GuiTextBox(gui.layoutRecs[4], gui.tsSecondaryText, 128,
-                   gui.tsSecondaryEditMode))
-      gui.tsSecondaryEditMode = !gui.tsSecondaryEditMode;
-    if (GuiLabelButton(gui.layoutRecs[5], "Time signature"))
-      TimeSignatureLabel();
-    GuiCheckBox(gui.layoutRecs[6], " Snap: 1 / ", &gui.snapChecked);
-    if (GuiLabelButton(gui.layoutRecs[7], "BPM"))
-      LabelButton007();
-    if (GuiValueBox(gui.layoutRecs[8], NULL, &gui.bpmValue, 0, 100,
-                    gui.bpmEditMode))
-      gui.bpmEditMode = !gui.bpmEditMode;
-    if (GuiLabelButton(gui.layoutRecs[9], "Current BPM"))
-      LabelButton009();
-    if (GuiValueBox(gui.layoutRecs[10], NULL, &gui.currentBPMValue, 0, 100,
-                    gui.currentBPMEditMode))
-      gui.currentBPMEditMode = !gui.currentBPMEditMode;
-    if (GuiLabelButton(gui.layoutRecs[11], "Current sec"))
-      LabelButton011();
-    if (GuiValueBox(gui.layoutRecs[12], NULL, &gui.currentTimeValue, 0, 100,
-                    gui.currentTimeEditMode))
-      gui.currentTimeEditMode = !gui.currentTimeEditMode;
-    if (GuiTextBox(gui.layoutRecs[13], gui.snapFrequencyText, 128,
-                   gui.snapFrequencyEditMode))
-      gui.snapFrequencyEditMode = !gui.snapFrequencyEditMode;
-  }
-
-  if (curSpline != -1) {
-    Spline& spline = splines[curSpline];
-    Vector2 splineAnchor = {gui.anchor01.x - 160, gui.layoutRecs[0].y +
-                                                      gui.layoutRecs[0].height +
-                                                      gui.anchor01.y + 8};
-    GuiWindowBox({splineAnchor.x, splineAnchor.y, 144, 300}, "Spline Debug");
-    splineAnchor.y += 24;
-
-    GuiLabel(gui.splineLayoutRecs[1], "Start time");
-    if (GuiTextBox(gui.splineLayoutRecs[2], gui.startTimeText, 32,
-                   gui.startTimeEditMode)) {
-      gui.startTimeEditMode = !gui.startTimeEditMode;
-      if (!gui.startTimeEditMode) {
-        spline.startBit = atof(gui.startTimeText);
-        if (spline.startBit < 0.0f)
-          spline.startBit = 0.0f;
+    }
+    if (ImGui::Button("Reset (r)")) {
+      LvlEditor::Restart();
+    }
+    ImGui::Text("Beat: %.2f", curTime / gm.timePerBit);
+    ImGui::Text("Time: %.2f", curTime);
+    if (curSpline != -1) {
+      ImGui::SeparatorText("Spline");
+      Spline& spline = splines[curSpline];
+      ImGui::Text("Start time");
+      ImGui::SetNextItemWidth(-1);
+      if (ImGui::InputFloat("##startTime", &spline.startBit, 0.1f, 1.0f,
+                            "%.2f")) {
+        spline.startBit = std::max(0.0f, spline.startBit);
         spline.startTime = spline.startBit * gm.timePerBit;
-        sprintf(gui.startTimeText, "%.2f", spline.startBit);
       }
-    }
-    GuiLabel(gui.splineLayoutRecs[3], TextFormat("%.2f", spline.startBit));
-
-    // Amount
-    GuiLabel(gui.splineLayoutRecs[4], "Amount");
-    if (GuiTextBox(gui.splineLayoutRecs[5], gui.amountText, 32,
-                   gui.amountEditMode)) {
-      gui.amountEditMode = !gui.amountEditMode;
-      if (!gui.amountEditMode) {
-        spline.amount = atoi(gui.amountText);
-        if (spline.amount < 1)
-          spline.amount = 1;
-        if (spline.amount > 100)
-          spline.amount = 100;
-        sprintf(gui.amountText, "%d", spline.amount);
+      ImGui::Text("Amount");
+      ImGui::SetNextItemWidth(-1);
+      if (ImGui::InputInt("##amount", &spline.amount, 1, 10)) {
+        spline.amount = std::clamp(spline.amount, 1, 100);
       }
-    }
-    GuiLabel(gui.splineLayoutRecs[6], TextFormat("%d", spline.amount));
-
-    // Duration
-    GuiLabel(gui.splineLayoutRecs[7], "Duration");
-    if (GuiTextBox(gui.splineLayoutRecs[8], gui.durationText, 32,
-                   gui.durationEditMode)) {
-      gui.durationEditMode = !gui.durationEditMode;
-      if (!gui.durationEditMode) {
-        spline.durationBit = atof(gui.durationText);
-        if (spline.durationBit < 0.1f)
-          spline.durationBit = 0.1f;
+      ImGui::Text("Duration");
+      ImGui::SetNextItemWidth(-1);
+      if (ImGui::InputFloat("##duration", &spline.durationBit, 0.1f, 1.0f,
+                            "%.2f")) {
+        spline.durationBit = std::max(0.1f, spline.durationBit);
         spline.duration = spline.durationBit * gm.timePerBit;
-        sprintf(gui.durationText, "%.2f", spline.durationBit);
       }
     }
-    GuiLabel(gui.splineLayoutRecs[9], TextFormat("%.2f", spline.durationBit));
   }
+  ImGui::End();
+  rlImGuiEnd();
 }
 
 void LvlEditor::OnPause() {
@@ -250,6 +103,15 @@ std::tuple<int, int> LvlEditor::FindNearestPoint(Vector2 target,
     }
   }
   return std::make_tuple(-1, -1);
+}
+
+void LvlEditor::Restart() {
+  GameManager& gm = Config::Get().gameManager;
+  curTime = 0.0f;
+  gm.SetMusicTime(0.0f);
+  if (pause) {
+    OnPause();
+  }
 }
 
 void LvlEditor::Update() {
@@ -292,8 +154,7 @@ void LvlEditor::Update() {
   }
 
   if (IsKeyPressed(KEY_R)) {
-    curTime = 0.0f;
-    gm.SetMusicTime(0.0f);
+    Restart();
   }
 
   if (curSpline != -1 && IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_D)) {
@@ -341,6 +202,11 @@ void LvlEditor::NewSpline(float time, Vector2& startPoint) {
 
 void LvlEditor::UpdateSplines() {
   GameManager& gm = Config::Get().gameManager;
+
+  // ImGuiIO& io = ImGui::GetIO();
+  //
+  // if (io.WantCaptureMouse)
+  //   return;
 
   bool leftPressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
   bool rightPressed = IsMouseButtonPressed(MOUSE_BUTTON_RIGHT);
@@ -402,7 +268,6 @@ void LvlEditor::UpdateSplines() {
           }
         }
       } else if (rightPressed && !pointNotFound) {
-        std::cout << "HI" << std::endl;
         // Remove points from spline
         std::vector<Vector2>& points = splines[splineIdx].points;
         bool isLastPoint = pointIdx == points.size() - 1;
@@ -436,17 +301,12 @@ void LvlEditor::UpdateSplines() {
         curP = pointIdx;
         curSpline = splineIdx;
         Spline& spline = splines[splineIdx];
-        sprintf(gui.startTimeText, "%.2f", spline.startBit);
-        sprintf(gui.amountText, "%d", spline.amount);
-        sprintf(gui.durationText, "%.2f", spline.durationBit);
       }
     }
   }
 
   // Handle mouse release events
-  if (anyReleased && !isDoubleClick &&
-      !CollisionSolver::pointRectCollision(gui.splineWindow, mousePos) &&
-      !CollisionSolver::pointRectCollision(gui.layoutRecs[0], mousePos)) {
+  if (anyReleased && !isDoubleClick) {
     if (pointNotFound) {
       curP = -1;
       curSpline = -1;
@@ -480,15 +340,14 @@ void LvlEditor::UpdateSplines() {
 }
 
 void LvlEditor::UpdateCamera() {
+  // ImGuiIO& io = ImGui::GetIO();
+  //
+  // if (io.WantCaptureMouse)
+  //   return;
+
   Camera2D& camera = Config::Get().mainCamera;
-  // Handle camera zoom with scroll wheel
   float wheel = GetMouseWheelMove();
-  if (CollisionSolver::pointRectCollision(gui.splineWindow, mousePos) ||
-      CollisionSolver::pointRectCollision(gui.timelineWindow, mousePos) ||
-      CollisionSolver::pointRectCollision(gui.layoutRecs[0], mousePos) ||
-      CollisionSolver::pointRectCollision(gui.layoutRecs[1], mousePos)) {
-    return;
-  }
+
   if (wheel != 0) {
     // Calculate zoom factor
     float zoomIncrement = 0.1f;

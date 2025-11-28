@@ -17,7 +17,7 @@ Enemy::Enemy(Vector2 _controlingPivot, float _controllingRange)
 void Enemy::Draw() {
   DrawRectangleV(Utils::Subtract(translation, Utils::Multiply(size, 0.5)), size,
                  {255, 0, 0, 120});
-  if (Config::Get().gizmosUIEnabled) {
+  if (Config::Get().gizmosEnabled) {
     ShapeDrawer::DrawShape(colliderShape);
   }
 }

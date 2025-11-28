@@ -55,7 +55,7 @@ void Target::Draw() {
     }
     return;
   }
-  if (Config::Get().gizmosUIEnabled) {
+  if (Config::Get().gizmosEnabled) {
     ShapeDrawer::DrawShape(colliderShape);
   }
   Color startChargeColor = BLUE;
