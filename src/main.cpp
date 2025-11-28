@@ -40,15 +40,15 @@ int main() {
   float h = GetScreenHeight();
   float w = GetScreenWidth();
 
-  Config &config = Config::Get();
+  Config& config = Config::Get();
   config.terrain = Terrain();
   config.player = Player();
   config.gameManager = GameManager();
   config.mainCamera = Camera2D();
 
-  Camera2D &camera = config.mainCamera;
-  Player &player = config.player;
-  GameManager &gameManager = config.gameManager;
+  Camera2D& camera = config.mainCamera;
+  Player& player = config.player;
+  GameManager& gameManager = config.gameManager;
   Gizmos gizmos;
   GameOverScreen gameOverScreen;
   LvlEditor lvlEditor;
@@ -76,13 +76,13 @@ int main() {
     }
 
     if (config.gameState == GameState::PLAY) {
-      for (Enemy &enemy : config.enemies) {
+      for (Enemy& enemy : config.enemies) {
         enemy.Update();
       };
       player.Update();
       gizmos.Update();
       gameManager.Update();
-      for (Target &target : config.targets) {
+      for (Target& target : config.targets) {
         target.Update();
       };
       camera.target = (Vector2){player.translation.x, player.translation.y};
@@ -107,13 +107,13 @@ int main() {
       rlImGuiEnd();
 
       gizmos.Draw();
-      for (Tile &tile : config.terrain.tiles) {
+      for (Tile& tile : config.terrain.tiles) {
         tile.Draw(spritesheet);
       }
-      for (Target &target : config.targets) {
+      for (Target& target : config.targets) {
         target.Draw();
       };
-      for (Enemy &enemy : config.enemies) {
+      for (Enemy& enemy : config.enemies) {
         enemy.Draw();
       };
       player.Draw();
