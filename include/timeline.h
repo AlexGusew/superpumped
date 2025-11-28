@@ -20,9 +20,9 @@ typedef struct {
 
 class GUINode {
 protected:
-  Config &config;
-  float &w;
-  float &h;
+  Config& config;
+  float& w;
+  float& h;
 
 public:
   GUINode() : config(Config::Get()), w(config.w), h(config.h) {}
@@ -59,7 +59,7 @@ typedef struct {
 } LineGUI;
 
 class SplineGUI : public GUINode {
-  Spline &spline;
+  Spline& spline;
   Rectangle pos;
 
 public:
@@ -68,7 +68,7 @@ public:
   void Calculate() override;
   void Render() const override;
 
-  SplineGUI(Spline &_spline) : spline(_spline) {};
+  SplineGUI(Spline& _spline) : spline(_spline) {};
 };
 
 class TimelineGUI : public GUINode {
@@ -83,5 +83,5 @@ public:
   void Calculate() override;
   void Render() const override;
 
-  void NewSplineGUI(Spline &newSpline);
+  void NewSplineGUI(Spline& newSpline);
 };

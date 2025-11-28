@@ -3,9 +3,9 @@
 
 class ShapeDrawer {
 private:
-  static void DrawCircleOutline(const Circle *circle);
-  static void DrawRectangleOutline(const OrientedRectangle *rect);
+  static void DrawCircleOutline(const Circle* circle);
+  static void DrawRectangleOutline(const OrientedRectangle* rect);
 
 public:
-  static void DrawShape(const Shape *shape);
+  static void DrawShape(const Shape* shape);
 };

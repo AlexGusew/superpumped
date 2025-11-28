@@ -35,8 +35,8 @@ void GameManager::Init(float _bpm, float _startTimePadding) {
 };
 
 void GameManager::Reset() {
-  Config &config = Config::Get();
-  Player &player = config.player;
+  Config& config = Config::Get();
+  Player& player = config.player;
   float h = GetScreenHeight();
   float w = GetScreenWidth();
 
@@ -55,7 +55,7 @@ void GameManager::SetMusicTime(float newTime) {
 }
 
 void GameManager::Start() {
-  Config &config = Config::Get();
+  Config& config = Config::Get();
   config.Reset();
   config.gameState = GameState::PLAY;
   float h = GetScreenHeight();
@@ -91,14 +91,14 @@ void GameManager::Start() {
 }
 
 void GameManager::FinishGame(bool win) {
-  Config &config = Config::Get();
+  Config& config = Config::Get();
   config.gameState = GameState::GAME_OVER;
   config.win = win;
   config.lastHighScore = std::max(config.score, config.lastHighScore);
 }
 
 void GameManager::Update() {
-  Config &config = Config::Get();
+  Config& config = Config::Get();
   if (IsMusicStreamPlaying(track)) {
     playedTime += GetFrameTime();
   }
@@ -135,7 +135,7 @@ void GameManager::DrawUI() {
   DrawCircle(
       w - 30, h - 30, 20,
       {255, 0, 0, static_cast<unsigned char>(100 + factor * (255 - 100))});
-  for (auto &time : perfectDashTimes) {
+  for (auto& time : perfectDashTimes) {
     if (playedTime - time < 2) {
       float shift = (playedTime - time) / 2;
       DrawText(

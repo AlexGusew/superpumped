@@ -40,7 +40,7 @@ void Player::Update() {
   translation.y = translation.y + dy;
   colliderShape->center = Utils::Add(translation, Utils::Multiply(size, 0.5f));
 
-  for (auto &tile : Config::Get().terrain.tiles) {
+  for (auto& tile : Config::Get().terrain.tiles) {
     if (!tile.colliderShape || !tile.usePhysics)
       continue;
     CollisionResult result =
@@ -51,7 +51,7 @@ void Player::Update() {
     CollisionSolver::resolveCollisionSimple(velocity, result.normal);
   }
 
-  for (auto &target : Config::Get().targets) {
+  for (auto& target : Config::Get().targets) {
     if (!target.ready)
       continue;
     CollisionResult result =
@@ -61,7 +61,7 @@ void Player::Update() {
     target.Reach();
   }
 
-  for (auto &enemy : Config::Get().enemies) {
+  for (auto& enemy : Config::Get().enemies) {
     if (!enemy.colliderShape || lastHitTime + hitInvulDelta > GetTime())
       continue;
     CollisionResult result =

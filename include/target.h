@@ -16,7 +16,7 @@ public:
   bool reached;
   bool ready;
 
-  Target(const Vector2 &_translation, float _readyDelta, float _disappearDelta,
+  Target(const Vector2& _translation, float _readyDelta, float _disappearDelta,
          float _chargingDelta);
   void Reach();
   void Update() override;

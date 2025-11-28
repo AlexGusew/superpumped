@@ -10,7 +10,7 @@ void TrackGUI::Render() const {
 }
 
 void SplineGUI::Calculate() {
-  GameManager &gm = Config::Get().gameManager;
+  GameManager& gm = Config::Get().gameManager;
 
   lines.clear();
 
@@ -29,13 +29,13 @@ void SplineGUI::Calculate() {
 void SplineGUI::Render() const {
   DrawRectangle(pos.x, pos.y, pos.width, pos.height,
                 ColorAlpha(GREEN, spline.selected ? 0.6 : 0.3));
-  for (const LineGUI &line : lines) {
+  for (const LineGUI& line : lines) {
     DrawLineV(line.start, line.end, GRAY);
   }
 }
 
 void BeatsGUI::Calculate() {
-  GameManager &gm = config.gameManager;
+  GameManager& gm = config.gameManager;
   float trackTotalTime = GetMusicTimeLength(gm.track);
   float totalBeats = trackTotalTime / gm.timePerBit;
   float eachBeatLen = w / totalBeats;
@@ -46,7 +46,7 @@ void BeatsGUI::Calculate() {
   for (size_t i = 0; i < totalBeats; i++) {
     float x = i * eachBeatLen;
     if (i % 4 == 0) {
-      const char *text = TextFormat("%d", i);
+      const char* text = TextFormat("%d", i);
       float textLen = MeasureText(text, 12);
       texts.push_back({{x - textLen / 2, h - 115}, text});
       lines.push_back(
@@ -59,10 +59,10 @@ void BeatsGUI::Calculate() {
 }
 
 void BeatsGUI::Render() const {
-  for (const Text &t : texts) {
+  for (const Text& t : texts) {
     DrawText(t.value.c_str(), t.pos.x, t.pos.y, 12, GRAY);
   }
-  for (const auto &[a, b] : lines) {
+  for (const auto& [a, b] : lines) {
     DrawLineV(a, b, GRAY);
   }
 }
@@ -71,7 +71,7 @@ void TimelineGUI::Calculate() {
   pos = {0, h - 90, w, 90};
   beats.Calculate();
   track.Calculate();
-  for (SplineGUI &spline : splines) {
+  for (SplineGUI& spline : splines) {
     spline.Calculate();
   }
 }
@@ -80,14 +80,14 @@ void TimelineGUI::Render() const {
   DrawRectangle(pos.x, pos.y, pos.width, pos.height, {25, 25, 25, 255});
   beats.Render();
   track.Render();
-  for (const SplineGUI &spline : splines) {
+  for (const SplineGUI& spline : splines) {
     spline.Render();
   }
 }
 
-void TimelineGUI::NewSplineGUI(Spline &newSpline) {
+void TimelineGUI::NewSplineGUI(Spline& newSpline) {
   splines.emplace_back(newSpline);       // Construct directly in vector
-  SplineGUI &splineGUI = splines.back(); // Get reference to the vector element
+  SplineGUI& splineGUI = splines.back(); // Get reference to the vector element
 
   // Setup the splineGUI
   for (size_t j = 0; j < newSpline.amount; j++) {

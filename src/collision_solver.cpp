@@ -47,22 +47,22 @@ CollisionResult::CollisionResult()
 CollisionResult::CollisionResult(bool col, Vector2 pen, Vector2 norm)
     : colliding(col), penetration(pen), normal(norm) {}
 
-void CollisionSolver::projectCircle(const Circle *circle, const Vector2 &axis,
-                                    float &min, float &max) {
+void CollisionSolver::projectCircle(const Circle* circle, const Vector2& axis,
+                                    float& min, float& max) {
   float center_projection = Utils::Dot(circle->center, axis);
   min = center_projection - circle->radius;
   max = center_projection + circle->radius;
 }
 
-bool CollisionSolver::pointRectCollision(const Rectangle &rectangle,
+bool CollisionSolver::pointRectCollision(const Rectangle& rectangle,
                                          const Vector2 point) {
   return point.x > rectangle.x && point.x < rectangle.x + rectangle.width &&
          point.y > rectangle.y && point.y < rectangle.y + rectangle.height;
 }
 
-void CollisionSolver::projectRectangle(const OrientedRectangle *rect,
-                                       const Vector2 &axis, float &min,
-                                       float &max) {
+void CollisionSolver::projectRectangle(const OrientedRectangle* rect,
+                                       const Vector2& axis, float& min,
+                                       float& max) {
   auto vertices = rect->getVertices();
   min = max = Utils::Dot(vertices[0], axis);
 
@@ -74,7 +74,7 @@ void CollisionSolver::projectRectangle(const OrientedRectangle *rect,
 }
 
 bool CollisionSolver::checkOverlap(float min1, float max1, float min2,
-                                   float max2, float &overlap) {
+                                   float max2, float& overlap) {
   if (max1 < min2 || max2 < min1) {
     return false; // No overlap
   }
@@ -84,24 +84,24 @@ bool CollisionSolver::checkOverlap(float min1, float max1, float min2,
 }
 
 // Main collision detection using polymorphism
-CollisionResult CollisionSolver::checkCollision(const Shape *shape1,
-                                                const Shape *shape2) {
+CollisionResult CollisionSolver::checkCollision(const Shape* shape1,
+                                                const Shape* shape2) {
   if (shape1->getType() == Shape::CIRCLE &&
       shape2->getType() == Shape::CIRCLE) {
-    return checkCollision(static_cast<const Circle *>(shape1),
-                          static_cast<const Circle *>(shape2));
+    return checkCollision(static_cast<const Circle*>(shape1),
+                          static_cast<const Circle*>(shape2));
   } else if (shape1->getType() == Shape::ORIENTED_RECTANGLE &&
              shape2->getType() == Shape::ORIENTED_RECTANGLE) {
-    return checkCollision(static_cast<const OrientedRectangle *>(shape1),
-                          static_cast<const OrientedRectangle *>(shape2));
+    return checkCollision(static_cast<const OrientedRectangle*>(shape1),
+                          static_cast<const OrientedRectangle*>(shape2));
   } else if (shape1->getType() == Shape::CIRCLE &&
              shape2->getType() == Shape::ORIENTED_RECTANGLE) {
-    return checkCollision(static_cast<const Circle *>(shape1),
-                          static_cast<const OrientedRectangle *>(shape2));
+    return checkCollision(static_cast<const Circle*>(shape1),
+                          static_cast<const OrientedRectangle*>(shape2));
   } else if (shape1->getType() == Shape::ORIENTED_RECTANGLE &&
              shape2->getType() == Shape::CIRCLE) {
-    return checkCollision(static_cast<const OrientedRectangle *>(shape1),
-                          static_cast<const Circle *>(shape2));
+    return checkCollision(static_cast<const OrientedRectangle*>(shape1),
+                          static_cast<const Circle*>(shape2));
   }
 
   // Should never reach here with valid shapes
@@ -109,8 +109,8 @@ CollisionResult CollisionSolver::checkCollision(const Shape *shape1,
 }
 
 // Circle-Circle collision using distance check
-CollisionResult CollisionSolver::checkCollision(const Circle *c1,
-                                                const Circle *c2) {
+CollisionResult CollisionSolver::checkCollision(const Circle* c1,
+                                                const Circle* c2) {
   Vector2 diff = Utils::Subtract(c2->center, c1->center);
   float distance_sq = diff.x * diff.x + diff.y * diff.y;
   float radius_sum = c1->radius + c2->radius;
@@ -134,8 +134,8 @@ CollisionResult CollisionSolver::checkCollision(const Circle *c1,
 }
 
 // OrientedRectangle-OrientedRectangle collision using SAT
-CollisionResult CollisionSolver::checkCollision(const OrientedRectangle *r1,
-                                                const OrientedRectangle *r2) {
+CollisionResult CollisionSolver::checkCollision(const OrientedRectangle* r1,
+                                                const OrientedRectangle* r2) {
   std::vector<Vector2> axes;
 
   // Get normals from both rectangles
@@ -148,7 +148,7 @@ CollisionResult CollisionSolver::checkCollision(const OrientedRectangle *r1,
   float min_overlap = std::numeric_limits<float>::max();
   Vector2 separation_axis = {0, 0};
 
-  for (const auto &axis : axes) {
+  for (const auto& axis : axes) {
     float min1, max1, min2, max2;
     projectRectangle(r1, axis, min1, max1);
     projectRectangle(r2, axis, min2, max2);
@@ -176,8 +176,8 @@ CollisionResult CollisionSolver::checkCollision(const OrientedRectangle *r1,
 }
 
 // Circle-OrientedRectangle collision using SAT with special handling
-CollisionResult CollisionSolver::checkCollision(const Circle *circle,
-                                                const OrientedRectangle *rect) {
+CollisionResult CollisionSolver::checkCollision(const Circle* circle,
+                                                const OrientedRectangle* rect) {
   std::vector<Vector2> axes;
 
   // Add rectangle normals
@@ -189,7 +189,7 @@ CollisionResult CollisionSolver::checkCollision(const Circle *circle,
   float closest_dist_sq = std::numeric_limits<float>::max();
   Vector2 closest_vertex;
 
-  for (const auto &vertex : vertices) {
+  for (const auto& vertex : vertices) {
     Vector2 diff = Utils::Subtract(circle->center, vertex);
     float dist_sq = diff.x * diff.x + diff.y * diff.y;
     if (dist_sq < closest_dist_sq) {
@@ -207,7 +207,7 @@ CollisionResult CollisionSolver::checkCollision(const Circle *circle,
   float min_overlap = std::numeric_limits<float>::max();
   Vector2 separation_axis = {0, 0};
 
-  for (const auto &axis : axes) {
+  for (const auto& axis : axes) {
     float min_circle, max_circle, min_rect, max_rect;
     projectCircle(circle, axis, min_circle, max_circle);
     projectRectangle(rect, axis, min_rect, max_rect);
@@ -235,8 +235,8 @@ CollisionResult CollisionSolver::checkCollision(const Circle *circle,
 }
 
 // OrientedRectangle-Circle collision (reverse parameter order)
-CollisionResult CollisionSolver::checkCollision(const OrientedRectangle *rect,
-                                                const Circle *circle) {
+CollisionResult CollisionSolver::checkCollision(const OrientedRectangle* rect,
+                                                const Circle* circle) {
   CollisionResult result = checkCollision(circle, rect);
   // Flip the penetration vector since we swapped the order
   result.penetration = Utils::Multiply(result.penetration, -1.0f);
@@ -246,8 +246,8 @@ CollisionResult CollisionSolver::checkCollision(const OrientedRectangle *rect,
 }
 
 // Simple collision resolution (stops movement in collision direction)
-void CollisionSolver::resolveCollisionSimple(Vector2 &velocity,
-                                             const Vector2 &normal) {
+void CollisionSolver::resolveCollisionSimple(Vector2& velocity,
+                                             const Vector2& normal) {
   // Remove velocity component in the direction of collision
   float velAlongNormal = Utils::Dot(velocity, normal);
   if (velAlongNormal < 0) { // Only if moving towards the collision

@@ -27,9 +27,9 @@ public:
   float w;
   float h;
 
-  static Config &Get();
-  Config(const Config &) = delete;
-  void operator=(const Config &) = delete;
+  static Config& Get();
+  Config(const Config&) = delete;
+  void operator=(const Config&) = delete;
   Config() = default;
   void Reset();
 };

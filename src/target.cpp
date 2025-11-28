@@ -7,7 +7,7 @@
 #include <iostream>
 #include <ostream>
 
-Target::Target(const Vector2 &_translation, float _readyDelta,
+Target::Target(const Vector2& _translation, float _readyDelta,
                float _disappearDelta, float _chargingDelta)
     : GameObject(_translation, {32, 32},
                  new OrientedRectangle(_translation, {32, 32})),

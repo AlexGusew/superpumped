@@ -23,7 +23,7 @@ void Enemy::Draw() {
 }
 
 void Enemy::Update() {
-  Player &player = Config::Get().player;
+  Player& player = Config::Get().player;
   float distToPivot =
       Utils::Magnitude(Utils::Subtract(translation, controllingPivot));
   float distToPlayer =

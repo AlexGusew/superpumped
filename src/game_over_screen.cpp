@@ -7,7 +7,7 @@
 #include <string>
 
 void GameOverScreen::Draw() {
-  Config &config = Config::Get();
+  Config& config = Config::Get();
   float w = GetScreenWidth();
   float h = GetScreenHeight();
 

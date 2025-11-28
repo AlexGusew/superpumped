@@ -7,13 +7,13 @@ class GameObject {
 public:
   Vector2 translation;
   Vector2 size;
-  Shape *colliderShape;
+  Shape* colliderShape;
   bool usePhysics;
   bool enabled;
 
-  inline GameObject(const Vector2 &_translation, const Vector2 &_size,
-                    Shape *_colliderShape = nullptr,
-                    const bool &_usePhysics = false)
+  inline GameObject(const Vector2& _translation, const Vector2& _size,
+                    Shape* _colliderShape = nullptr,
+                    const bool& _usePhysics = false)
       : translation(_translation), size(_size), colliderShape(_colliderShape),
         enabled(true) {}
 

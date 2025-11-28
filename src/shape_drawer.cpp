@@ -1,10 +1,10 @@
 #include "shape_drawer.h"
 
-void ShapeDrawer::DrawCircleOutline(const Circle *circle) {
+void ShapeDrawer::DrawCircleOutline(const Circle* circle) {
   DrawCircleLinesV(circle->center, circle->radius, WHITE);
 }
 
-void ShapeDrawer::DrawRectangleOutline(const OrientedRectangle *rect) {
+void ShapeDrawer::DrawRectangleOutline(const OrientedRectangle* rect) {
   auto vertices = rect->getVertices();
 
   // Draw the four edges
@@ -15,13 +15,13 @@ void ShapeDrawer::DrawRectangleOutline(const OrientedRectangle *rect) {
   }
 }
 
-void ShapeDrawer::DrawShape(const Shape *shape = nullptr) {
+void ShapeDrawer::DrawShape(const Shape* shape = nullptr) {
   if (shape == nullptr)
     return;
 
   if (shape->getType() == Shape::CIRCLE) {
-    DrawCircleOutline(static_cast<const Circle *>(shape));
+    DrawCircleOutline(static_cast<const Circle*>(shape));
   } else if (shape->getType() == Shape::ORIENTED_RECTANGLE) {
-    DrawRectangleOutline(static_cast<const OrientedRectangle *>(shape));
+    DrawRectangleOutline(static_cast<const OrientedRectangle*>(shape));
   }
 }

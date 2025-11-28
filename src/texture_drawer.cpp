@@ -1,8 +1,8 @@
 #include "texture_drawer.h"
 
 TextureDrawer::TextureDrawer(
-    const std::string &path,
-    const std::unordered_map<std::string, std::pair<int, int>> &_config,
+    const std::string& path,
+    const std::unordered_map<std::string, std::pair<int, int>>& _config,
     int _size)
     : config(_config), size(_size) {
   texture = LoadTexture(path.c_str());
@@ -10,7 +10,7 @@ TextureDrawer::TextureDrawer(
 
 TextureDrawer::~TextureDrawer() { Unload(); }
 
-void TextureDrawer::Draw(const std::string &id, Vector2 position) {
+void TextureDrawer::Draw(const std::string& id, Vector2 position) {
   if (config.find(id) != config.end()) {
     int row = config[id].first;
     int col = config[id].second;

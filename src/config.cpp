@@ -1,6 +1,6 @@
 #include "config.h"
 
-Config &Config::Get() {
+Config& Config::Get() {
   static Config instance;
   return instance;
 }

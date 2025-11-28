@@ -114,8 +114,8 @@ static void LabelButton011() {
 }
 
 void LvlEditor::DrawUI() {
-  Config &config = Config::Get();
-  GameManager &gm = config.gameManager;
+  Config& config = Config::Get();
+  GameManager& gm = config.gameManager;
 
   float w = GetScreenWidth();
   float h = GetScreenHeight();
@@ -170,7 +170,7 @@ void LvlEditor::DrawUI() {
   }
 
   if (curSpline != -1) {
-    Spline &spline = splines[curSpline];
+    Spline& spline = splines[curSpline];
     Vector2 splineAnchor = {gui.anchor01.x - 160, gui.layoutRecs[0].y +
                                                       gui.layoutRecs[0].height +
                                                       gui.anchor01.y + 8};
@@ -225,8 +225,8 @@ void LvlEditor::DrawUI() {
 }
 
 void LvlEditor::OnPause() {
-  Config &config = Config::Get();
-  Music &track = Config::Get().gameManager.track;
+  Config& config = Config::Get();
+  Music& track = Config::Get().gameManager.track;
 
   pause = !pause;
 
@@ -242,7 +242,7 @@ void LvlEditor::OnPause() {
 std::tuple<int, int> LvlEditor::FindNearestPoint(Vector2 target,
                                                  float maxDist) {
   for (size_t i = 0; i < splines.size(); i++) {
-    std::vector<Vector2> &points = splines[i].points;
+    std::vector<Vector2>& points = splines[i].points;
     for (size_t j = 0; j < points.size(); j++) {
       if (Utils::Magnitude(Utils::Subtract(points[j], target)) < maxDist) {
         return std::make_tuple(static_cast<int>(i), static_cast<int>(j));
@@ -253,9 +253,9 @@ std::tuple<int, int> LvlEditor::FindNearestPoint(Vector2 target,
 }
 
 void LvlEditor::Update() {
-  Music &track = Config::Get().gameManager.track;
-  Camera2D &camera = Config::Get().mainCamera;
-  GameManager &gm = Config::Get().gameManager;
+  Music& track = Config::Get().gameManager.track;
+  Camera2D& camera = Config::Get().mainCamera;
+  GameManager& gm = Config::Get().gameManager;
 
   float w = GetScreenWidth();
   float h = GetScreenHeight();
@@ -306,22 +306,22 @@ void LvlEditor::Update() {
   timelineGUI.Calculate();
 }
 
-void LvlEditor::DuplicateSpline(float time, Spline &referenceSpline) {
-  GameManager &gm = Config::Get().gameManager;
+void LvlEditor::DuplicateSpline(float time, Spline& referenceSpline) {
+  GameManager& gm = Config::Get().gameManager;
   float w = GetScreenWidth();
   float h = GetScreenHeight();
 
   splines.push_back(Spline{referenceSpline});
   splines.back().startTime = time;
 
-  for (Vector2 &point : splines.back().points) {
+  for (Vector2& point : splines.back().points) {
     point = Utils::Add(point, {50, 0});
   }
   timelineGUI.NewSplineGUI(splines.back());
 }
 
-void LvlEditor::NewSpline(float time, Vector2 &startPoint) {
-  GameManager &gm = Config::Get().gameManager;
+void LvlEditor::NewSpline(float time, Vector2& startPoint) {
+  GameManager& gm = Config::Get().gameManager;
   std::vector<Vector2> newPoints;
 
   for (int i = 0; i < 4; i++) {
@@ -340,7 +340,7 @@ void LvlEditor::NewSpline(float time, Vector2 &startPoint) {
 }
 
 void LvlEditor::UpdateSplines() {
-  GameManager &gm = Config::Get().gameManager;
+  GameManager& gm = Config::Get().gameManager;
 
   bool leftPressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
   bool rightPressed = IsMouseButtonPressed(MOUSE_BUTTON_RIGHT);
@@ -370,7 +370,7 @@ void LvlEditor::UpdateSplines() {
         NewSpline(curTime, mouseWorldPos);
       } else if (leftPressed && !pointNotFound) {
         // Extend spline
-        std::vector<Vector2> &points = splines[splineIdx].points;
+        std::vector<Vector2>& points = splines[splineIdx].points;
         bool isLastPoint = pointIdx == points.size() - 1;
 
         if (isFirstPoint) {
@@ -404,7 +404,7 @@ void LvlEditor::UpdateSplines() {
       } else if (rightPressed && !pointNotFound) {
         std::cout << "HI" << std::endl;
         // Remove points from spline
-        std::vector<Vector2> &points = splines[splineIdx].points;
+        std::vector<Vector2>& points = splines[splineIdx].points;
         bool isLastPoint = pointIdx == points.size() - 1;
 
         if (isFirstPoint && points.size() > 4) {
@@ -435,7 +435,7 @@ void LvlEditor::UpdateSplines() {
       if (leftPressed && !pointNotFound) {
         curP = pointIdx;
         curSpline = splineIdx;
-        Spline &spline = splines[splineIdx];
+        Spline& spline = splines[splineIdx];
         sprintf(gui.startTimeText, "%.2f", spline.startBit);
         sprintf(gui.amountText, "%d", spline.amount);
         sprintf(gui.durationText, "%.2f", spline.durationBit);
@@ -457,12 +457,12 @@ void LvlEditor::UpdateSplines() {
   // Handle dragging
   if (leftDown && curP != -1 && curSpline != -1 && curSpline < splines.size() &&
       curP < splines[curSpline].points.size()) {
-    std::vector<Vector2> &points = splines[curSpline].points;
+    std::vector<Vector2>& points = splines[curSpline].points;
     Vector2 oldPos = points[curP];
     Vector2 newPos = mouseWorldPos;
     Vector2 delta = Utils::Subtract(newPos, oldPos);
     if (IsKeyDown(KEY_LEFT_ALT)) {
-      for (Vector2 &point : points) {
+      for (Vector2& point : points) {
         point = Utils::Add(point, delta);
       }
     } else {
@@ -480,7 +480,7 @@ void LvlEditor::UpdateSplines() {
 }
 
 void LvlEditor::UpdateCamera() {
-  Camera2D &camera = Config::Get().mainCamera;
+  Camera2D& camera = Config::Get().mainCamera;
   // Handle camera zoom with scroll wheel
   float wheel = GetMouseWheelMove();
   if (CollisionSolver::pointRectCollision(gui.splineWindow, mousePos) ||
@@ -536,7 +536,7 @@ void LvlEditor::UpdateCamera() {
 
 void LvlEditor::Draw() {
   for (size_t i = 0; i < splines.size(); i++) {
-    Spline &spline = splines[i];
+    Spline& spline = splines[i];
 
     float distPerOne = (spline.points.size() - 1.0f) / 3 / (spline.amount - 1);
     if (spline.amount <= 1) {

@@ -13,13 +13,13 @@ public:
   int size;
 
   TextureDrawer(
-      const std::string &path,
-      const std::unordered_map<std::string, std::pair<int, int>> &_config,
+      const std::string& path,
+      const std::unordered_map<std::string, std::pair<int, int>>& _config,
       int _size);
 
   ~TextureDrawer();
 
-  void Draw(const std::string &id, Vector2 position);
+  void Draw(const std::string& id, Vector2 position);
 
   void Unload();
 };

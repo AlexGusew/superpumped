@@ -67,6 +67,6 @@ public:
   void Draw();
   void DrawUI();
   void OnPause();
-  void NewSpline(float time, Vector2 &startPoint);
-  void DuplicateSpline(float time, Spline &referenceSpline);
+  void NewSpline(float time, Vector2& startPoint);
+  void DuplicateSpline(float time, Spline& referenceSpline);
 };

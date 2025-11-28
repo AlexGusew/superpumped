@@ -48,33 +48,33 @@ struct CollisionResult {
 
 class CollisionSolver {
 private:
-  static void projectCircle(const Circle *circle, const Vector2 &axis,
-                            float &min, float &max);
-  static void projectRectangle(const OrientedRectangle *rect,
-                               const Vector2 &axis, float &min, float &max);
+  static void projectCircle(const Circle* circle, const Vector2& axis,
+                            float& min, float& max);
+  static void projectRectangle(const OrientedRectangle* rect,
+                               const Vector2& axis, float& min, float& max);
 
   static bool checkOverlap(float min1, float max1, float min2, float max2,
-                           float &overlap);
+                           float& overlap);
 
 public:
-  static CollisionResult checkCollision(const Shape *shape1,
-                                        const Shape *shape2);
-  static bool pointRectCollision(const Rectangle &rectangle,
+  static CollisionResult checkCollision(const Shape* shape1,
+                                        const Shape* shape2);
+  static bool pointRectCollision(const Rectangle& rectangle,
                                  const Vector2 point);
 
-  static CollisionResult checkCollision(const Circle *c1, const Circle *c2);
-  static CollisionResult checkCollision(const OrientedRectangle *r1,
-                                        const OrientedRectangle *r2);
-  static CollisionResult checkCollision(const Circle *circle,
-                                        const OrientedRectangle *rect);
-  static CollisionResult checkCollision(const OrientedRectangle *rect,
-                                        const Circle *circle);
-  static CollisionResult checkCollision(const OrientedRectangle *rect,
-                                        const Vector2 *point);
+  static CollisionResult checkCollision(const Circle* c1, const Circle* c2);
+  static CollisionResult checkCollision(const OrientedRectangle* r1,
+                                        const OrientedRectangle* r2);
+  static CollisionResult checkCollision(const Circle* circle,
+                                        const OrientedRectangle* rect);
+  static CollisionResult checkCollision(const OrientedRectangle* rect,
+                                        const Circle* circle);
+  static CollisionResult checkCollision(const OrientedRectangle* rect,
+                                        const Vector2* point);
 
-  static void resolveCollision(Vector2 &vel1, Vector2 &vel2,
-                               const Vector2 &normal, float mass1 = 1.0f,
+  static void resolveCollision(Vector2& vel1, Vector2& vel2,
+                               const Vector2& normal, float mass1 = 1.0f,
                                float mass2 = 1.0f, float restitution = 0.8f);
 
-  static void resolveCollisionSimple(Vector2 &velocity, const Vector2 &normal);
+  static void resolveCollisionSimple(Vector2& velocity, const Vector2& normal);
 };

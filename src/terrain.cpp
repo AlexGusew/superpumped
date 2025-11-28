@@ -7,7 +7,7 @@
 #include <sstream>
 #include <stdexcept>
 
-void Terrain::load(const std::string &_path) {
+void Terrain::load(const std::string& _path) {
   path = _path;
 
   std::ifstream file(path);
@@ -37,9 +37,9 @@ void Terrain::load(const std::string &_path) {
         if (!token.empty()) {
           row.push_back(std::stoi(token));
         }
-      } catch (const std::invalid_argument &e) {
+      } catch (const std::invalid_argument& e) {
         throw std::runtime_error("Invalid number format in file: " + token);
-      } catch (const std::out_of_range &e) {
+      } catch (const std::out_of_range& e) {
         throw std::runtime_error("Number out of range in file: " + token);
       }
     }
@@ -66,7 +66,7 @@ void Terrain::generateTiles() {
   }
 
   size_t total_tiles = 0;
-  for (const auto &row : positions) {
+  for (const auto& row : positions) {
     for (int tile_type : row) {
       if (tile_type != 0) { // Assuming 0 means empty
         total_tiles++;
@@ -82,7 +82,7 @@ void Terrain::generateTiles() {
       Vector2 size = {GRID_SIZE, GRID_SIZE};
       switch (positions[i][j]) {
       case 1: {
-        OrientedRectangle *collider = new OrientedRectangle(
+        OrientedRectangle* collider = new OrientedRectangle(
             {
                 translation.x + size.x / 2,
                 translation.y + size.y / 2,
